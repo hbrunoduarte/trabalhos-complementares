@@ -1,4 +1,4 @@
-// gcc cc snowman.c -lglut -lGL -lGLU -lm -o snowman.out && ./snowman
+// gcc snowman.c -lglut -lGL -lGLU -lm -o snowman.out && ./snowman.out
 // para compilar e executar
 
 #include <GL/glut.h>
@@ -59,7 +59,105 @@ void SpecialKeys(int key, int x, int y) {
 }
 
 void RenderScene(void) {
-    //
+    // limpa a janela
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  
+  
+    // move a area pra "desenhar" pra não ficar em cima da câmera
+    glPushMatrix();
+	glTranslatef(0.0f, -1.0f, -5.0f);  
+	glRotatef(yRot, 0.0f, 1.0f, 0.0f);
+    glRotatef(xRot, 1.0f, 0.0f, 0.0f);  
+
+    // -- CABECA --
+
+	// cor branca
+	glColor3f(1.0f, 1.0f, 1.0f);
+
+	glPushMatrix();
+        glTranslatef(0.0f, 1.0f, 0.0f);
+        glutSolidSphere(0.24f, 26, 13);
+	glPopMatrix();
+
+    // -- NARIZ --
+
+    // cor laranja
+	glColor3f(1.0f, 0.4f, 0.51f);  
+
+	glPushMatrix();
+        glTranslatef(0.0f, 1.0f, 0.2f);
+        glutSolidCone(0.04f, 0.3f, 26, 13);
+	glPopMatrix();
+
+    // -- OLHOS --
+
+    // cor preta
+    glColor3f(0.0f, 0.0f, 0.0f);
+
+    // olho esquerdo
+    glPushMatrix();
+        glTranslatef(-0.08f, 1.08f, 0.2f);
+        glutSolidSphere(0.03f, 10, 10);
+    glPopMatrix();
+
+    // olho direito
+    glPushMatrix();
+        glTranslatef(0.08f, 1.08f, 0.2f);
+        glutSolidSphere(0.03f, 10, 10);
+    glPopMatrix();
+
+    // -- BARRIGA --
+
+    // cor branca
+    glColor3f(1.0f, 1.0f, 1.0f);
+
+    glPushMatrix();
+        glTranslatef(0.0f, 0.55f, 0.0f);
+        glutSolidSphere(0.30f, 26, 13);
+    glPopMatrix();
+
+    // -- BASE --
+
+    glPushMatrix();
+        glTranslatef(0.0f, 0.1f, 0.0f);
+        glutSolidSphere(0.38f, 26, 13);
+    glPopMatrix();
+
+    // -- BRACOS -- 
+
+    // cor marrom 
+    glColor3f(0.36f, 0.20f, 0.09f);
+
+    // braco direito
+    glPushMatrix();
+        glTranslatef(0.28f, 0.60f, 0.0f);
+        glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
+        glRotatef(-30.0f, 1.0f, 0.0f, 0.0f);
+        glutSolidCone(0.02f, 0.5f, 10, 10);
+    glPopMatrix();
+
+    // braco esquerdo
+    glPushMatrix();
+        glTranslatef(-0.28f, 0.60f, 0.0f);
+        glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
+        glRotatef(-30.0f, 1.0f, 0.0f, 0.0f);
+        glutSolidCone(0.02f, 0.5f, 10, 10);
+    glPopMatrix();
+
+    // -- CHAPEU --
+
+    // cor preta
+    glColor3f(0.0f, 0.0f, 0.0f);
+
+    glPushMatrix();
+
+    glPopMatrix();
+
+    ////////////////////////////////////////////
+
+    // volta na posicao global
+    glPopMatrix();  
+    // mostra a tela
+    glutSwapBuffers();  
 }
 
 void init() {
@@ -110,8 +208,8 @@ int main(int argc, char* argv[]) {
     glutReshapeFunc(ChangeSize);  
     // configurações das teclas
     glutSpecialFunc(SpecialKeys);
-    //  ...
-    //RenderScene
+    // configuracoes da cena
+    glutDisplayFunc(RenderScene);
 
     // função chamada pra inicialização de luzes
     // e renderização
