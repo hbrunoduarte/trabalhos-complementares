@@ -4,7 +4,8 @@
 #include <GL/glut.h>
 
 static GLfloat yRot = 0.0f;
-static GLfixed xRot = 0.0f;
+static GLfloat xRot = 0.0f;
+static GLfloat yCam = -1.0f;
 
 void ChangeSize(int w, int h) {
     GLfloat fAspect;
@@ -34,6 +35,21 @@ void ChangeSize(int w, int h) {
     glLoadIdentity();
 }
 
+void NormalKeys(unsigned char key, int x, int y) {
+    // 27 é o código ascii para a tecla esc
+    if (key == 27) {
+        exit(0);
+    }
+
+    if(key == 'w' || key == 'W')
+        yCam -= 0.1f;
+
+    if(key == 's' || key == 'S')
+        yCam += 0.1f;
+
+    glutPostRedisplay();
+}
+
 void SpecialKeys(int key, int x, int y) {
     if(key == GLUT_KEY_LEFT)
         yRot -= 5.0f;
@@ -54,19 +70,20 @@ void SpecialKeys(int key, int x, int y) {
     xRot = (GLfloat)((const int)xRot % 360);  
 
     // apagar a tela e rodar RenderScene de novo
-    // pois os valores xRot e yRot mudaram
     glutPostRedisplay();  
 }
 
 void RenderScene(void) {
+    GLUquadricObj *pObj = gluNewQuadric();
+
     // limpa a janela
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  
   
     // move a area pra "desenhar" pra não ficar em cima da câmera
     glPushMatrix();
-	glTranslatef(0.0f, -1.0f, -5.0f);  
+	glTranslatef(0.0f, yCam, -5.0f);  
 	glRotatef(yRot, 0.0f, 1.0f, 0.0f);
-    glRotatef(xRot, 1.0f, 0.0f, 0.0f);  
+    glRotatef(xRot, 1.0f, 0.0f, 0.0f);
 
     // -- CABECA --
 
@@ -145,15 +162,52 @@ void RenderScene(void) {
 
     // -- CHAPEU --
 
-    // cor preta
-    glColor3f(0.0f, 0.0f, 0.0f);
-
+    // cor cinza bem escuro
+    glColor3f(0.1f, 0.1f, 0.1f);
     glPushMatrix();
+        glTranslatef(0.0f, 1.18f, 0.0f);
+        glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+        gluCylinder(pObj, 0.25f, 0.25f, 0.05f, 26, 13);
 
+        // tampa de cima
+        glPushMatrix();
+            glTranslatef(0.0f, 0.0f, 0.05f);
+            gluDisk(pObj, 0.0f, 0.25f, 26, 1);
+        glPopMatrix();
+            
+        // tampa de baixo
+        glPushMatrix();
+            glRotatef(180.0f, 1.0f, 0.0f, 0.0f);
+            gluDisk(pObj, 0.0f, 0.25f, 26, 1);
+        glPopMatrix();
     glPopMatrix();
+
+    // cor vermelha
+    glColor3f(1.0f, 0.0f, 0.0f);
+    glPushMatrix();
+        glTranslatef(0.0, 1.23, 0.0f);
+        glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+        gluCylinder(pObj, 0.16f, 0.16f, 0.05f, 26, 13);
+    glPopMatrix();
+
+    glColor3f(0.1f, 0.1f, 0.1f);
+    glPushMatrix();
+        glTranslatef(0.0, 1.28, 0.0f);
+        glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+        gluCylinder(pObj, 0.16f, 0.16f, 0.1f, 26, 13);
+
+        glPushMatrix();
+            glTranslatef(0.0f, 0.0f, 0.1f);
+            gluDisk(pObj, 0.0f, 0.16f, 26, 1);
+        glPopMatrix();
+    glPopMatrix();
+
+    
 
     ////////////////////////////////////////////
 
+    // deleta a quadrica criada
+    gluDeleteQuadric(pObj);
     // volta na posicao global
     glPopMatrix();  
     // mostra a tela
@@ -206,7 +260,9 @@ int main(int argc, char* argv[]) {
 
     // configurações da câmera
     glutReshapeFunc(ChangeSize);  
-    // configurações das teclas
+    // configuracoes das teclas normais
+    glutKeyboardFunc(NormalKeys);
+    // configurações das teclas especiais
     glutSpecialFunc(SpecialKeys);
     // configuracoes da cena
     glutDisplayFunc(RenderScene);
