@@ -100,21 +100,27 @@ void RenderScene(void) {
     glColor3f(0.7f, 0.1f, 0.1f);
 
     glPushMatrix();
-
         // centro do tronco
         glTranslatef(0.0f, 1.05f, 0.0f);
 
         // tronco
         glPushMatrix();
+            glTranslatef(0.0f, -0.25f, 0.0f);
             // glScalef(largura_x, altura_y, profundidade_z)
-            glScalef(0.6f, 0.9f, 0.4f);
+            glScalef(0.45f, 0.4f, 0.4f);
             // glutSolidCube(tamanho da base)
+            glutSolidCube(1.0f);
+        glPopMatrix();
+
+        glPushMatrix();
+            glTranslatef(0.0f, 0.20f, 0.0f);
+            glScalef(0.6f, 0.5f, 0.4f);
             glutSolidCube(1.0f);
         glPopMatrix();
 
         // reator
         glPushMatrix();
-            glTranslatef(0.0f, 0.15f, 0.21f);
+            glTranslatef(0.0f, 0.2f, 0.21f);
             
             glColor3f(0.2f, 0.8f, 1.0f);
             // gluDisk(obj, raio_interno, raio_externo, fatias, loops)
@@ -308,7 +314,58 @@ void RenderScene(void) {
         glPopMatrix();
 
         // cabeca
+        glTranslatef(0.0f, 0.7f, 0.0f);
 
+        glColor3f(0.7f, 0.1f, 0.1f);
+        glutSolidSphere(0.25f, 15, 15);
+
+        // mascara
+        glPushMatrix();
+            // parte de cima + olhos
+            glPushMatrix();
+                glColor3f(0.8f, 0.6f, 0.1f);
+                glTranslatef(0.0f, 0.05f, 0.2f);
+                glPushMatrix();
+                    glScalef(0.78f, 0.28f, 0.2f);
+                    glutSolidCube(0.5f);
+                glPopMatrix();
+
+                glColor3f(0.2f, 0.8f, 1.0f);
+                glTranslatef(0.0f, 0.0f, 0.06f);
+
+                // olho direito
+                glPushMatrix();
+                    glTranslatef(0.12f, 0.0f, 0.0f);
+                    glScalef(0.12f, 0.05f, 0.01f);
+                    glutSolidCube(1.0f);
+                glPopMatrix();
+
+                // olho esquerdo
+                glPushMatrix();
+                    glTranslatef(-0.12f, 0.0f, 0.0f); 
+                    glScalef(0.12f, 0.05f, 0.01f);
+                    glutSolidCube(1.0f);
+                glPopMatrix();
+            glPopMatrix();
+            
+            // parte de baixo
+            glPushMatrix();
+                glColor3f(0.8f, 0.6f, 0.1f);
+                glTranslatef(0.0f, -0.1f, 0.2f);
+                glScalef(0.5f, 0.4f, 0.2f);
+                glutSolidCube(0.5f);
+
+                glPushMatrix();
+                    glColor3f(0.1f, 0.1f, 0.1f);
+                    glTranslatef(0.0f, 0.0f, 0.2f);
+                    glScalef(0.8f, 0.15f, 0.8f);
+                    glutSolidCube(0.50);
+                glPopMatrix();
+
+
+            glPopMatrix();
+
+        glPopMatrix();
 
     glPopMatrix();
 
