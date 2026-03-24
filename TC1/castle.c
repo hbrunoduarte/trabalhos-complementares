@@ -26,7 +26,7 @@ void ChangeSize(int w, int h) {
     glLoadIdentity();  
     // define o FOV (field of view), o aspecto da tela, 
     // o plano de corte "near" e o plano de corte "far"
-    gluPerspective(35.0f, fAspect, 1.0, 40.0);
+    gluPerspective(50.0f, fAspect, 1.0, 40.0);
 
     // voltamos pro modo de mexer nos objetos ao
     // invés da câmera
@@ -219,6 +219,14 @@ void RenderScene(void) {
         gluCylinder(pObj, 0.5f, 0.5f, 1.0f, 100, 13);
 	glPopMatrix();
 
+    // Torre Central
+
+    glColor3f(COLOR(0xa6, 0xa6, 0xa6));
+    glPushMatrix();
+        glTranslatef(0.0f, 0.0f, 0.0f);
+        glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+        gluCylinder(pObj, 1.5f, 1.5f, 2.5f, 26, 13);
+    glPopMatrix();
 
     // Paredes
 
@@ -253,6 +261,57 @@ void RenderScene(void) {
     glPushMatrix();
         glTranslatef(0.0f, -0.2f, 0.0f);
         desenharPrisma(2.5f, 0.4f, 0.0f, 0.2f, 0.6f, 5.0f);
+    glPopMatrix();
+
+    // Telhados das Torres
+
+    // Telhado 1
+
+    glColor3f(COLOR(0x44, 0x2a, 0x25));
+    glPushMatrix();
+        glTranslatef(-2.5f, 1.0f, -2.5f);
+        glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+        gluCylinder(pObj, 0.7f, 0.0f, 0.5f, 26, 13);
+        glPushMatrix();
+            gluDisk(pObj, 0.5f, 0.7f, 100, 100);
+        glPopMatrix();
+    glPopMatrix();
+
+    // Telhado 2
+
+    glColor3f(COLOR(0x44, 0x2a, 0x25));
+    glPushMatrix();
+        glTranslatef(-2.5f, 1.0f, 2.5f);
+        glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+        gluCylinder(pObj, 0.7f, 0.0f, 0.5f, 26, 13);
+        glPushMatrix();
+            gluDisk(pObj, 0.5f, 0.7f, 100, 100);
+        glPopMatrix();
+    glPopMatrix();
+
+    // Telhado 3
+
+    glColor3f(COLOR(0x44, 0x2a, 0x25));
+    glPushMatrix();
+        glTranslatef(2.5f, 1.0f, 2.5f);
+        glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+        gluCylinder(pObj, 0.7f, 0.0f, 0.5f, 26, 13);
+        glPushMatrix();
+            gluDisk(pObj, 0.5f, 0.7f, 100, 100);
+        glPopMatrix();
+    glPopMatrix();
+
+    // Telhado 4
+
+    glColor3f(COLOR(0x44, 0x2a, 0x25));
+    glPushMatrix();
+        glTranslatef(2.5f, 1.0f, -2.5f);
+        glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+        gluCylinder(pObj, 0.7f, 0.0f, 0.5f, 26, 13);
+
+        glPushMatrix();
+            gluDisk(pObj, 0.5f, 0.7f, 100, 100);
+        glPopMatrix();
     glPopMatrix();
 
 	////////////////////////////////////////////
