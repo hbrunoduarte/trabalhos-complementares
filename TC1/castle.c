@@ -26,11 +26,11 @@ void ChangeSize(int w, int h) {
     glLoadIdentity();  
     // define o FOV (field of view), o aspecto da tela, 
     // o plano de corte "near" e o plano de corte "far"
-    gluPerspective(50.0f, fAspect, 1.0, 40.0);
+    gluPerspective(100.0f, fAspect, 0.2, 70.0);
 
     // voltamos pro modo de mexer nos objetos ao
     // invés da câmera
-    glMatrixMode(GL_MODELVIEW);  
+    glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 }
 
@@ -170,7 +170,7 @@ void RenderScene(void) {
 	glRotatef(yRot, 0.0f, 1.0f, 0.0f);
     glRotatef(xRot, 1.0f, 0.0f, 0.0f);
 
-	desenhaEixos();
+	//desenhaEixos();
 
 	////////////////////////////////////////////
 
@@ -185,7 +185,7 @@ void RenderScene(void) {
 
 	// Torre 1
 
-	glColor3f(COLOR(0xd9, 0xbc, 0xa3));
+    glColor3f(COLOR(0xa6, 0xa6, 0xa6));
 	glPushMatrix();
 		glTranslatef(-2.5f, 0.0f, -2.5f);
         glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
@@ -194,7 +194,6 @@ void RenderScene(void) {
 
     // Torre 2
 
-    glColor3f(COLOR(0xd9, 0xbc, 0xa3));
 	glPushMatrix();
 		glTranslatef(-2.5f, 0.0f, 2.5f);
         glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
@@ -203,7 +202,6 @@ void RenderScene(void) {
 
     // Torre 3
 
-    glColor3f(COLOR(0xd9, 0xbc, 0xa3));
 	glPushMatrix();
 		glTranslatef(2.5f, 0.0f, 2.5f);
         glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
@@ -212,7 +210,6 @@ void RenderScene(void) {
 
     // Torre 4
 
-    glColor3f(COLOR(0xd9, 0xbc, 0xa3));
 	glPushMatrix();
 		glTranslatef(2.5f, 0.0f, -2.5f);
         glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
@@ -221,26 +218,36 @@ void RenderScene(void) {
 
     // Torre Central
 
-    glColor3f(COLOR(0xa6, 0xa6, 0xa6));
     glPushMatrix();
         glTranslatef(0.0f, 0.0f, 0.0f);
         glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
-        gluCylinder(pObj, 1.5f, 1.5f, 2.5f, 26, 13);
+        gluCylinder(pObj, 1.5f, 1.5f, 2.5f, 30, 10);
     glPopMatrix();
 
     // Paredes
 
-    // Parede 1-4
-
-    glColor3f(COLOR(0x7d, 0x3c, 0x07));
-    glPushMatrix();
-        glTranslatef(0.0f, -0.2f, 0.0f);
-        desenharPrisma(0.0f, 0.4f, 2.5f, 5.0f, 0.6f, 0.2f);
-    glPopMatrix();
-
     // Parede 2-3
 
-    glColor3f(COLOR(0x7d, 0x3c, 0x07));
+    glColor3f(COLOR(0xd9, 0xbc, 0xa3));
+    glPushMatrix();
+        glPushMatrix();
+            glTranslatef(1.5f, -0.2f, 0.0f);
+            desenharPrisma(0.0f, 0.4f, 2.5f, 2.0f, 0.6f, 0.2f);
+        glPopMatrix();
+        glPushMatrix();
+            glTranslatef(-1.5f, -0.2f, 0.0f);
+            desenharPrisma(0.0f, 0.4f, 2.5f, 2.0f, 0.6f, 0.2f);
+        glPopMatrix();
+        glPushMatrix();
+            glTranslatef(0.0f, 0.5f, 2.5f);
+            glScalef(100.0f, 1.0f, 12.0f);
+            glutSolidCube(0.01f);
+        glPopMatrix();
+    glPopMatrix();
+
+    // Parede 1-4
+
+    glColor3f(COLOR(0xd9, 0xbc, 0xa3));
     glPushMatrix();
         glTranslatef(0.0f, -0.2f, 0.0f);
         desenharPrisma(0.0f, 0.4f, -2.5f, 5.0f, 0.6f, 0.2f);
@@ -248,7 +255,7 @@ void RenderScene(void) {
 
     // Parede 1-2
 
-    glColor3f(COLOR(0x7d, 0x3c, 0x07));
+    glColor3f(COLOR(0xd9, 0xbc, 0xa3));
     glPushMatrix();
         glTranslatef(0.0f, -0.2f, 0.0f);
         desenharPrisma(-2.5f, 0.4f, 0.0f, 0.2f, 0.6f, 5.0f);
@@ -257,7 +264,7 @@ void RenderScene(void) {
 
     // Parede 3-4
 
-    glColor3f(COLOR(0x7d, 0x3c, 0x07));
+    glColor3f(COLOR(0xd9, 0xbc, 0xa3));
     glPushMatrix();
         glTranslatef(0.0f, -0.2f, 0.0f);
         desenharPrisma(2.5f, 0.4f, 0.0f, 0.2f, 0.6f, 5.0f);
@@ -273,6 +280,7 @@ void RenderScene(void) {
         glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
         gluCylinder(pObj, 0.7f, 0.0f, 0.5f, 26, 13);
         glPushMatrix();
+            glRotatef(180.0f, 1.0f, 0.0f, 0.0f);
             gluDisk(pObj, 0.5f, 0.7f, 100, 100);
         glPopMatrix();
     glPopMatrix();
@@ -285,6 +293,7 @@ void RenderScene(void) {
         glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
         gluCylinder(pObj, 0.7f, 0.0f, 0.5f, 26, 13);
         glPushMatrix();
+            glRotatef(180.0f, 1.0f, 0.0f, 0.0f);
             gluDisk(pObj, 0.5f, 0.7f, 100, 100);
         glPopMatrix();
     glPopMatrix();
@@ -297,6 +306,7 @@ void RenderScene(void) {
         glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
         gluCylinder(pObj, 0.7f, 0.0f, 0.5f, 26, 13);
         glPushMatrix();
+            glRotatef(180.0f, 1.0f, 0.0f, 0.0f);
             gluDisk(pObj, 0.5f, 0.7f, 100, 100);
         glPopMatrix();
     glPopMatrix();
@@ -308,9 +318,232 @@ void RenderScene(void) {
         glTranslatef(2.5f, 1.0f, -2.5f);
         glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
         gluCylinder(pObj, 0.7f, 0.0f, 0.5f, 26, 13);
+        glPushMatrix();
+            glRotatef(180.0f, 1.0f, 0.0f, 0.0f);
+            gluDisk(pObj, 0.5f, 0.7f, 100, 100);
+        glPopMatrix();
+    glPopMatrix();
+
+    // Telhado Central
+
+    glColor3f(COLOR(0x44, 0x2a, 0x25));
+    glPushMatrix();
+        glTranslatef(0.0f, 2.5f, 0.0f);
+        glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+        gluCylinder(pObj, 1.6f, 0.0f, 1.5f, 26, 13);
+        glPushMatrix();
+            glDisable(GL_CULL_FACE);
+            gluDisk(pObj, 1.4f, 1.7f, 100, 100);
+            glEnable(GL_CULL_FACE);
+        glPopMatrix();
+    glPopMatrix();
+
+    // Bandeiras
+
+    // Bandeira 1
+
+    glColor3f(COLOR(0, 0, 0));
+    glPushMatrix();
 
         glPushMatrix();
-            gluDisk(pObj, 0.5f, 0.7f, 100, 100);
+            glTranslatef(-2.5f, 1.4f, -2.5f);
+            glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+            gluCylinder(pObj, 0.03f, 0.03f, 1.0f, 26, 13);
+
+            glColor3f(COLOR(0xff, 0, 0));
+            glPushMatrix();
+                desenharPrisma(0.35f, 0.0f, 0.7f, 0.7f, 0.02f, 0.5f);
+            glPopMatrix();
+        glPopMatrix();
+
+        glColor3f(COLOR(0, 0, 0));
+        glPushMatrix();
+            glTranslatef(-2.5, 2.38f, -2.5);
+            glutSolidSphere(0.05f, 20, 20);
+        glPopMatrix();
+    glPopMatrix();
+
+    // Bandeira 2
+
+    glColor3f(COLOR(0, 0, 0));
+    glPushMatrix();
+
+        glPushMatrix();
+            glTranslatef(-2.5f, 1.4f, 2.5f);
+            glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+            gluCylinder(pObj, 0.03f, 0.03f, 1.0f, 26, 13);
+
+            glColor3f(COLOR(0xff, 0, 0));
+            glPushMatrix();
+                desenharPrisma(0.35f, 0.0f, 0.7f, 0.7f, 0.02f, 0.5f);
+            glPopMatrix();
+        glPopMatrix();
+
+        glColor3f(COLOR(0, 0, 0));
+        glPushMatrix();
+            glTranslatef(-2.5, 2.38f, 2.5);
+            glutSolidSphere(0.05f, 20, 20);
+        glPopMatrix();
+    glPopMatrix();
+
+    // Bandeira 3
+
+    glColor3f(COLOR(0, 0, 0));
+    glPushMatrix();
+
+        glPushMatrix();
+            glTranslatef(2.5f, 1.4f, 2.5f);
+            glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+            gluCylinder(pObj, 0.03f, 0.03f, 1.0f, 26, 13);
+
+            glColor3f(COLOR(0xff, 0, 0));
+            glPushMatrix();
+                desenharPrisma(0.35f, 0.0f, 0.7f, 0.7f, 0.02f, 0.5f);
+            glPopMatrix();
+        glPopMatrix();
+
+        glColor3f(COLOR(0, 0, 0));
+        glPushMatrix();
+            glTranslatef(2.5, 2.38f, 2.5);
+            glutSolidSphere(0.05f, 20, 20);
+        glPopMatrix();
+    glPopMatrix();
+
+    // Bandeira 4
+
+    glColor3f(COLOR(0, 0, 0));
+    glPushMatrix();
+
+        glPushMatrix();
+            glTranslatef(2.5f, 1.4f, -2.5f);
+            glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+            gluCylinder(pObj, 0.03f, 0.03f, 1.0f, 26, 13);
+
+            glColor3f(COLOR(0xff, 0, 0));
+            glPushMatrix();
+                desenharPrisma(0.35f, 0.0f, 0.7f, 0.7f, 0.02f, 0.5f);
+            glPopMatrix();
+        glPopMatrix();
+
+        glColor3f(COLOR(0, 0, 0));
+        glPushMatrix();
+            glTranslatef(2.5, 2.38f, -2.5);
+            glutSolidSphere(0.05f, 20, 20);
+        glPopMatrix();
+    glPopMatrix();
+
+    // Bandeira Central
+
+    glColor3f(COLOR(0, 0, 0));
+    glPushMatrix();
+
+        glPushMatrix();
+            glTranslatef(0.0f, 3.9f, 0.0f);
+            glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+            gluCylinder(pObj, 0.03f, 0.03f, 1.0f, 26, 13);
+
+            glColor3f(COLOR(0xff, 0, 0));
+            glPushMatrix();
+                desenharPrisma(0.35f, 0.0f, 0.7f, 0.7f, 0.02f, 0.5f);
+            glPopMatrix();
+        glPopMatrix();
+
+        glColor3f(COLOR(0, 0, 0));
+        glPushMatrix();
+            glTranslatef(0.0f, 4.88f, 0.0f);
+            glutSolidSphere(0.05f, 20, 20);
+        glPopMatrix();
+    glPopMatrix();
+
+    // Lago Interno
+
+    glColor3f(COLOR(0, 0, 0xff));
+    glPushMatrix();
+        glTranslatef(-2.4f, 0.01f, -2.4f);
+        glRotatef(-90.0, 1.0f, 0.0f, 0.0f);
+        desenharPrisma(2.5f, -2.5f, 0.0f, 5.0f, 5.0f, 0.0f);
+    glPopMatrix();
+
+    // Ponte
+
+    glDisable(GL_LIGHTING); // Desliga a luz
+    glColor3f(COLOR(0x44, 0x2a, 0x25));
+    glPushMatrix();
+        glTranslatef(0.0f, 0.025f, 2.0f);
+        glScalef(1.0f, 0.05f, 1.2f);
+        glutSolidCube(1.0f);
+    glPopMatrix();
+    glEnable(GL_LIGHTING); // Liga a luz de volta
+
+    // Porta entrada
+
+    glColor3f(COLOR(0, 0, 0));
+    glPushMatrix();
+        glTranslatef(0.0f, 0.1f, 1.0f);
+        glScalef(0.5f, 1.0f, 1.0f);
+        glutSolidCube(1.0f);
+    glPopMatrix();
+
+    // Muros das torres
+
+    // 2-3
+
+    glColor3f(COLOR(0x44, 0x2a, 0x25));
+    glPushMatrix();
+        glPushMatrix();
+            glTranslatef(-0.1f, 0.5f, 2.4f);
+            glScalef(21.5f, 0.5f, 0.4f);
+            glutSolidCube(0.2f);
+        glPopMatrix();
+        glPushMatrix();
+            glTranslatef(-0.1f, 0.5f, 2.6f);
+            glScalef(21.5f, 0.5f, 0.4f);
+            glutSolidCube(0.2f);
+        glPopMatrix();
+    glPopMatrix();
+
+    glPushMatrix();
+        glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
+        glPushMatrix();
+            glTranslatef(-0.1f, 0.5f, 2.4f);
+            glScalef(21.5f, 0.5f, 0.4f);
+            glutSolidCube(0.2f);
+        glPopMatrix();
+        glPushMatrix();
+            glTranslatef(-0.1f, 0.5f, 2.6f);
+            glScalef(21.5f, 0.5f, 0.4f);
+            glutSolidCube(0.2f);
+        glPopMatrix();
+    glPopMatrix();
+
+    glPushMatrix();
+        glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
+        glPushMatrix();
+            glTranslatef(-0.1f, 0.5f, 2.4f);
+            glScalef(21.5f, 0.5f, 0.4f);
+            glutSolidCube(0.2f);
+        glPopMatrix();
+        glPushMatrix();
+            glTranslatef(-0.1f, 0.5f, 2.6f);
+            glScalef(21.5f, 0.5f, 0.4f);
+            glutSolidCube(0.2f);
+        glPopMatrix();
+    glPopMatrix();
+
+    glPushMatrix();
+        glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
+        glPushMatrix();
+            glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
+            glPushMatrix();
+                glTranslatef(-0.1f, 0.5f, 2.4f);
+                glScalef(21.5f, 0.5f, 0.4f);
+                glutSolidCube(0.2f);
+            glPopMatrix();
+            glPushMatrix();
+                glTranslatef(-0.1f, 0.5f, 2.6f);
+                glScalef(21.5f, 0.5f, 0.4f);
+                glutSolidCube(0.2f);
+            glPopMatrix();
         glPopMatrix();
     glPopMatrix();
 
