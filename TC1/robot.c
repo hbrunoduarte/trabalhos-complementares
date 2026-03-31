@@ -2,6 +2,7 @@
 // para compilar e executar
 
 #include <GL/glut.h>
+#include <stdio.h>
 
 static GLfloat yRot = 0.0f;
 static GLfloat xRot = 0.0f;
@@ -16,6 +17,9 @@ static GLfloat angCoxaDirX = 0.0f;
 static GLfloat angJoelhoDirX = 0.0f;
 static GLfloat angCoxaEsqX = 0.0f;
 static GLfloat angJoelhoEsqX = 0.0f;
+
+static int parteSelecionada = 0;
+const int TOTAL_PARTES = 8;
 
 void ChangeSize(int w, int h) {
     GLfloat fAspect;
@@ -51,11 +55,32 @@ void NormalKeys(unsigned char key, int x, int y) {
         exit(0);
     }
 
-    if(key == 'w' || key == 'W')
-        yCam += 0.1f;
+    // controle da câmera original
+    if(key == 'w' || key == 'W') yCam -= 0.1f;
+    if(key == 's' || key == 'S') yCam += 0.1f;
 
-    if(key == 's' || key == 'S')
-        yCam -= 0.1f;
+    // trocar a parte do corpo selecionada
+    if(key == 'p' || key == 'P') {
+        parteSelecionada = (parteSelecionada + 1) % TOTAL_PARTES;
+    }
+
+    // direção da rotação
+    float incremento = 0.0f;
+    if(key == 'r' || key == 'R') incremento = -5.0f;
+    if(key == 'f' || key == 'F') incremento = 5.0f;
+
+    if (incremento != 0.0f) {
+        switch(parteSelecionada) {
+            case 0: angOmbroDirX += incremento; break;
+            case 1: angCotoveloDirX += incremento; break;
+            case 2: angOmbroEsqX += incremento; break;
+            case 3: angCotoveloEsqX += incremento; break;
+            case 4: angCoxaDirX += incremento; break;
+            case 5: angJoelhoDirX += incremento; break;
+            case 6: angCoxaEsqX += incremento; break;
+            case 7: angJoelhoEsqX += incremento; break;
+        }
+    }
 
     glutPostRedisplay();
 }
@@ -274,7 +299,7 @@ void RenderScene(void) {
             // base do torso
             glTranslatef(-0.18f, -0.55f, 0.0f);
             // ponto de articulacao !!!
-            glRotatef(angCoxaDirX, 1.0f, 0.0f, 0.0f);
+            glRotatef(angCoxaEsqX, 1.0f, 0.0f, 0.0f);
 
             glColor3f(0.8f, 0.6f, 0.1f);
             // bola da coxa
@@ -290,7 +315,7 @@ void RenderScene(void) {
             glTranslatef(0.0f, -0.45f, 0.0f);
             glPushMatrix();
                 // ponto de articulacao !!!
-                glRotatef(angJoelhoDirX, 1.0f, 0.0f, 0.0f);
+                glRotatef(angJoelhoEsqX, 1.0f, 0.0f, 0.0f);
 
                 // joelho
                 glColor3f(0.8f, 0.6f, 0.1f);
