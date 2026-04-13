@@ -4,6 +4,10 @@
 #include <GL/glut.h>
 #include <math.h>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 #define COLOR(r,g,b) r/255.0,g/255.0,b/255.0
 
 #define TAM_GRADE_NEVE_GLOBO 60
@@ -11,9 +15,43 @@
 
 float alturas[TAM_GRADE_NEVE_GLOBO][TAM_GRADE_NEVE_GLOBO];
 
+#define GLOBE_RADIUS 1.2f
+
+typedef enum {
+    GROUND,
+    UP,
+    DRIFT,
+    DOWN
+} Stage;
+
+typedef struct {
+    float x, y, z;
+    Stage stage;
+    
+    // Variáveis do estado UP
+    float elevation; // Ângulo de subida (de -PI/2 no fundo até +PI/2 no topo)
+    float azimuth;   // Ângulo ao redor do globo (de 0 a 2*PI)
+    
+    float driftTimer;
+    float verticalMomentum;
+    
+    // Variáveis do estado DOWN
+    float fallSpeed;
+    float flutter;
+    float flutterAngle;
+
+    float freqX, freqZ, ampX, ampZ;
+} SnowFlake;
+
+#define MAX_PARTICLES 500
+
+SnowFlake particles[MAX_PARTICLES];
+
 static GLfloat yRot = 0.0f;
 static GLfloat xRot = 0.0f;
 static GLfloat yCam = -1.0f;
+
+void shakeGlobe();
 
 void ChangeSize(int w, int h) {
     GLfloat fAspect;
@@ -54,6 +92,9 @@ void NormalKeys(unsigned char key, int x, int y) {
 
     if(key == 's' || key == 'S')
         yCam += 0.1f;
+
+    if (key == 'q' || key == 'Q')
+        shakeGlobe();
 
     glutPostRedisplay();
 }
@@ -284,6 +325,136 @@ void desenharNeve(float raioBase) {
         glEnd();
     }
 }
+
+void initSnowFlake(SnowFlake *p) {
+    p->x = p->y = p->z = 0.0f;
+
+    p->fallSpeed = 0.05f;
+
+    p->flutterAngle = p->flutter = 1.2f;
+
+    p->elevation = p->azimuth = 0.0f;
+
+    p->driftTimer = p->verticalMomentum = 0.0f;
+
+    p->stage = GROUND;
+}
+
+void initSnowFlakes() {
+    for (int i = 0; i < MAX_PARTICLES; i++)
+        initSnowFlake(particles + i);
+}
+
+void drawSnowFlakes() {
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+    glPushMatrix();
+        glScalef(1.2f, 1.2f, 1.2f);
+        glTranslatef(0.0f, 0.6f, 0.0f);
+
+        glPointSize(3.0f);
+        glBegin(GL_POINTS);
+        for (int i = 0; i < MAX_PARTICLES; i++) {
+            if (particles[i].stage != GROUND) {
+                glColor3f(COLOR(0xFF, 0xFF, 0xFF));
+                glVertex3f(particles[i].x, particles[i].y, particles[i].z);
+            }
+        }
+        glEnd();
+    glPopMatrix(); // Finaliza a transformação da neve
+
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
+}
+
+void shakeGlobe() {
+    for (int i = 0; i < MAX_PARTICLES; i++) {
+        if (particles[i].stage == GROUND) {
+            particles[i].stage = UP;
+            
+            // NOVO: Adiciona uma variação aleatória para não subirem em anel
+            float randomOffset = ((float)(rand() % 100) / 100.0f) * (M_PI / 4.0f);
+            particles[i].elevation = -M_PI / 2.0f + randomOffset; 
+            
+            particles[i].azimuth = ((float)(rand() % 360)) * (M_PI / 180.0f);
+
+            particles[i].fallSpeed = 0.5f + ((float)(rand() % 100) / 100.0f) * 1.5f;
+            
+
+            particles[i].flutterAngle = ((float)(rand() % 360)) * (M_PI / 180.0f);
+            
+            // FREQUÊNCIAS: Cada floco tem sua própria curva de Lissajous
+            // X varia de 0.8 a 1.5 / Z varia de 1.1 a 1.8
+            particles[i].freqX = 0.8f + ((float)(rand() % 100) / 100.0f) * 0.7f;
+            particles[i].freqZ = 1.1f + ((float)(rand() % 100) / 100.0f) * 0.7f;
+            
+            // AMPLITUDES: Alguns flocos vão longe, outros caem quase retos
+            // Varia entre 0.3 e 1.3
+            particles[i].ampX = 0.3f + ((float)(rand() % 100) / 100.0f) * 1.0f;
+            particles[i].ampZ = 0.3f + ((float)(rand() % 100) / 100.0f) * 1.0f;
+        }
+    }
+}
+
+void updateSnowflakes3D(float deltaTime) {
+    for (int i = 0; i < MAX_PARTICLES; i++) {
+        
+        // --- ESTADO 1: UP (Subindo pelo vidro 3D) ---
+        if (particles[i].stage == UP) {
+
+            float upSpeed = 2.0f;
+            particles[i].elevation += upSpeed * deltaTime;
+            
+            particles[i].x = GLOBE_RADIUS * cos(particles[i].elevation) * cos(particles[i].azimuth);
+            particles[i].y = GLOBE_RADIUS * sin(particles[i].elevation);
+            particles[i].z = GLOBE_RADIUS * cos(particles[i].elevation) * sin(particles[i].azimuth);
+            
+            if (particles[i].y >= GLOBE_RADIUS * 0.8f) {
+                particles[i].stage = DRIFT;
+                particles[i].driftTimer = 0.3f;
+                particles[i].verticalMomentum = 0.4f;
+            }
+        }
+        
+        else if (particles[i].stage == DRIFT) {
+
+            particles[i].x *= (1.0f - 2.0f * deltaTime); 
+            particles[i].z *= (1.0f - 2.0f * deltaTime); 
+            
+            particles[i].y += particles[i].verticalMomentum * deltaTime;
+            particles[i].verticalMomentum -= 0.8f * deltaTime;
+            
+            particles[i].driftTimer -= deltaTime;
+            if (particles[i].driftTimer <= 0.0f) particles[i].stage = DOWN;
+        }
+        
+        else if (particles[i].stage == DOWN) {
+
+           particles[i].y -= particles[i].fallSpeed * deltaTime;
+    
+            particles[i].flutterAngle += 3.0f * deltaTime;
+            
+            particles[i].x += sin(particles[i].flutterAngle * particles[i].freqX) * particles[i].ampX * deltaTime;
+            particles[i].z += cos(particles[i].flutterAngle * particles[i].freqZ) * particles[i].ampZ * deltaTime;
+
+            float distanceSq = (particles[i].x * particles[i].x) + 
+                               (particles[i].y * particles[i].y) + 
+                               (particles[i].z * particles[i].z);
+                               
+            if (distanceSq >= GLOBE_RADIUS * GLOBE_RADIUS && particles[i].y < -0.1f) {
+                particles[i].stage = GROUND;
+                // Para não vazar o vidro, normalizamos o vetor (X,Y,Z) e multiplicamos pelo raio
+                float dist = sqrt(distanceSq);
+                particles[i].x = (particles[i].x / dist) * GLOBE_RADIUS;
+                particles[i].y = (particles[i].y / dist) * GLOBE_RADIUS;
+                particles[i].z = (particles[i].z / dist) * GLOBE_RADIUS;
+            }
+        }
+    }
+}
+
 void createSnowGlobe(GLUquadricObj *pObj) {
 
     glScalef(1.2f, 1.2f, 1.2f);
@@ -324,7 +495,7 @@ void createSnowGlobe(GLUquadricObj *pObj) {
     glColor4f(COLOR(0xFF, 0xFF, 0xFF), 0.3f);
     glPushMatrix();
         glTranslatef(0.0f, 0.6f, 0.0f);
-        glutSolidSphere(1.2f, 70, 70);
+        glutSolidSphere(GLOBE_RADIUS, 70, 70);
     glPopMatrix();
 
     // Restaura as configurações para o próximo frame
@@ -360,6 +531,9 @@ void RenderScene(void) {
             glTranslatef(0.0f, -0.01f, 0.0f); 
         }
     glPopMatrix();
+
+    updateSnowflakes3D(0.01);
+    drawSnowFlakes();
 
     createSnowGlobe(pObj);
 
@@ -409,6 +583,12 @@ void init() {
     glClearColor(0.25f, 0.25f, 0.50f, 1.0f);
     
     gerarNeve(1.15f);
+    initSnowFlakes();
+}
+
+void timer(int value) {
+    glutPostRedisplay();               // Manda redesenhar a tela
+    glutTimerFunc(16, timer, 0);       // Agenda a próxima chamada em 16ms
 }
 
 int main(int argc, char* argv[]) {
@@ -431,6 +611,9 @@ int main(int argc, char* argv[]) {
     // função chamada pra inicialização de luzes
     // e renderização
     init();
+
+    // Inicia o loop de animação
+    glutTimerFunc(0, timer, 0);
 
     // entra no loop principal
     glutMainLoop();
