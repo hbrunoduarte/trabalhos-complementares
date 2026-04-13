@@ -2,8 +2,14 @@
 // para compilar e executar
 
 #include <GL/glut.h>
+#include <math.h>
 
 #define COLOR(r,g,b) r/255.0,g/255.0,b/255.0
+
+#define TAM_GRADE_NEVE_GLOBO 60
+#define TAM_PASSO_NEVE_GLOBO 0.05f
+
+float alturas[TAM_GRADE_NEVE_GLOBO][TAM_GRADE_NEVE_GLOBO];
 
 static GLfloat yRot = 0.0f;
 static GLfloat xRot = 0.0f;
@@ -229,7 +235,58 @@ void createSnowman(GLUquadricObj *pObj) {
     glPopMatrix();
 }
 
+void gerarNeve(float raioBase) {
+    srand(time(NULL));
+    for(int x = 0; x < TAM_GRADE_NEVE_GLOBO; x++) {
+        for(int z = 0; z < TAM_GRADE_NEVE_GLOBO; z++) {
+            // Gera um ruído leve (irregularidade da neve) entre 0.0 e 0.08
+            float ruido = ((rand() % 100) / 100.0f) * 0.08f; 
+            
+            // Altura base fixada em -0.15f para afundar a base do boneco na neve
+            alturas[x][z] = -0.15f + ruido; 
+        }
+    }
+}
+
+void desenharNeve(float raioBase) {
+    glColor3f(1.0f, 1.0f, 1.0f); // Cor branca para a neve
+
+    for(int z = 0; z < TAM_GRADE_NEVE_GLOBO - 1; z++) {
+        glBegin(GL_TRIANGLE_STRIP);
+        for(int x = 0; x < TAM_GRADE_NEVE_GLOBO; x++) {
+            
+            // --- CÁLCULO DO PONTO ATUAL ---
+            float mx1 = (x - TAM_GRADE_NEVE_GLOBO / 2.0f) * TAM_PASSO_NEVE_GLOBO;
+            float mz1 = (z - TAM_GRADE_NEVE_GLOBO / 2.0f) * TAM_PASSO_NEVE_GLOBO;
+            float dist1 = sqrt(mx1*mx1 + mz1*mz1);
+            
+            // Puxa o vértice para a borda se ele passar do raio estipulado
+            if (dist1 > raioBase) {
+                mx1 = (mx1 / dist1) * raioBase; 
+                mz1 = (mz1 / dist1) * raioBase; 
+            }
+            glNormal3f(0.0f, 1.0f, 0.0f); // Aponta a normal para cima para o reflexo da luz
+            glVertex3f(mx1, alturas[x][z], mz1);
+
+            // --- CÁLCULO DO PONTO DA FRENTE ---
+            float mx2 = (x - TAM_GRADE_NEVE_GLOBO / 2.0f) * TAM_PASSO_NEVE_GLOBO;
+            float mz2 = ((z + 1) - TAM_GRADE_NEVE_GLOBO / 2.0f) * TAM_PASSO_NEVE_GLOBO;
+            float dist2 = sqrt(mx2*mx2 + mz2*mz2);
+            
+            // Repete a checagem de borda
+            if (dist2 > raioBase) {
+                mx2 = (mx2 / dist2) * raioBase;
+                mz2 = (mz2 / dist2) * raioBase;
+            }
+            glNormal3f(0.0f, 1.0f, 0.0f);
+            glVertex3f(mx2, alturas[x][z+1], mz2);
+        }
+        glEnd();
+    }
+}
 void createSnowGlobe(GLUquadricObj *pObj) {
+
+    glScalef(1.2f, 1.2f, 1.2f);
 
     // Base do Globo
 
@@ -257,6 +314,7 @@ void createSnowGlobe(GLUquadricObj *pObj) {
 
     // Globo
 
+    // Ativa a mistura de cores
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -279,7 +337,9 @@ void RenderScene(void) {
     GLUquadricObj *pObj = gluNewQuadric();
 
     // limpa a janela
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Libera a escrita no Depth Buffer
     glDepthMask(GL_TRUE);
   
     // move a area pra "desenhar" pra não ficar em cima da câmera
@@ -291,6 +351,15 @@ void RenderScene(void) {
     desenhaEixos();
 
     createSnowman(pObj);
+
+    glPushMatrix();
+        for (float h = 1.15f; h > 0.8f; h -= 0.01f) {
+            desenharNeve(h);
+            
+            // Move 0.01 unidades para baixo no eixo Y para a PRÓXIMA camada
+            glTranslatef(0.0f, -0.01f, 0.0f); 
+        }
+    glPopMatrix();
 
     createSnowGlobe(pObj);
 
@@ -337,7 +406,9 @@ void init() {
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 
     // cor que será usada para "apagar" os frames (cor de fundo)
-    glClearColor(0.25f, 0.25f, 0.50f, 1.0f);  
+    glClearColor(0.25f, 0.25f, 0.50f, 1.0f);
+    
+    gerarNeve(1.15f);
 }
 
 int main(int argc, char* argv[]) {
