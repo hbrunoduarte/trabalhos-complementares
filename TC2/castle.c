@@ -1,10 +1,43 @@
 #include <GL/glut.h>
+#include <math.h>
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+#ifndef GLUT_KEY_SHIFT_L
+#define GLUT_KEY_SHIFT_L 0x0070 // Código hexadecimal (112 em decimal) no FreeGLUT
+#endif
 
 #define COLOR(r,g,b) r/255.0,g/255.0,b/255.0
 
-static GLfloat yRot = 0.0f;
-static GLfloat xRot = 0.0f;
-static GLfloat yCam = -1.0f;
+// Posição Chão
+const float chaoY = -5.0f;
+
+// Velocidade de movimento da câmera
+const float speed = 0.5f;
+
+// Posição inicial da câmera (um pouco mais para trás e para cima)
+float camX = 0.0f, camY = 2.0f, camZ = 7.0f; 
+
+// Vetor que aponta para onde estamos olhando
+float lookX = 0.0f, lookY = 0.0f, lookZ = -1.0f; 
+
+// Ângulos de visão (Yaw = esquerda/direita, Pitch = cima/baixo)
+float yaw = 0.0f; 
+float pitch = 0.0f;
+
+// Atualiza o vetor de direção com base nos ângulos de visão
+void atualizaVetorVisao() {
+    // Converte os ângulos de graus para radianos
+    float radYaw = yaw * M_PI / 180.0f;
+    float radPitch = pitch * M_PI / 180.0f;
+
+    // Calcula os novos vetores de direção
+    lookX = sin(radYaw) * cos(radPitch);
+    lookY = sin(radPitch);
+    lookZ = -cos(radYaw) * cos(radPitch);
+}
 
 void ChangeSize(int w, int h) {
     GLfloat fAspect;
@@ -35,40 +68,76 @@ void ChangeSize(int w, int h) {
 }
 
 void NormalKeys(unsigned char key, int x, int y) {
-    // 27 é o código ascii para a tecla esc
-    if (key == 27) {
+
+    if (key == 27) { // ESC
         exit(0);
     }
 
-    if(key == 'w' || key == 'W')
-        yCam -= 0.1f;
+    // Subir
+    if (key == ' ') {
+        camY += speed;
+    }
 
-    if(key == 's' || key == 'S')
-        yCam += 0.1f;
+    // Ir para frente (W)
+    if (key == 'w' || key == 'W') {
+        camX += lookX * speed;
+        // camY += lookY * speed;
+        camZ += lookZ * speed;
+    }
+
+    // Ir para trás (S)
+    if (key == 's' || key == 'S') {
+        camX -= lookX * speed;
+        // camY -= lookY * speed;
+        camZ -= lookZ * speed;
+    }
+
+    // Andar de lado para a esquerda (A)
+    if (key == 'a' || key == 'A') {
+        float radYaw = (yaw - 90.0f) * M_PI / 180.0f;
+        camX += sin(radYaw) * speed;
+        camZ += -cos(radYaw) * speed;
+    }
+
+    // Andar de lado para a direita (D)
+    if (key == 'd' || key == 'D') {
+        float radYaw = (yaw + 90.0f) * M_PI / 180.0f;
+        camX += sin(radYaw) * speed;
+        camZ += -cos(radYaw) * speed;
+    }
 
     glutPostRedisplay();
 }
 
 void SpecialKeys(int key, int x, int y) {
-    if(key == GLUT_KEY_LEFT)
-        yRot -= 5.0f;
+    float rotSpeed = 3.0f; // Velocidade de rotação
 
-    if(key == GLUT_KEY_RIGHT)
-        yRot += 5.0f;
+    if (key == GLUT_KEY_LEFT)
+        yaw -= rotSpeed;
+    if (key == GLUT_KEY_RIGHT)
+        yaw += rotSpeed;
+    
+    if (key == GLUT_KEY_UP)
+        pitch += rotSpeed;
+    if (key == GLUT_KEY_DOWN)
+        pitch -= rotSpeed;
 
-    // evita que yRot tome um valor muito alto
-    yRot = (GLfloat)((const int)yRot % 360);  
+    // Trava o eixo Y (Pitch) para não "dar cambalhota" e bugar a câmera
+    if (pitch > 89.0f) pitch = 89.0f;
+    if (pitch < -89.0f) pitch = -89.0f;
 
-    if(key == GLUT_KEY_UP)
-        xRot += 5.0f;
+    // Descer (Shift Esquerdo)
+    if(key == GLUT_KEY_SHIFT_L) {
+        camY -= speed;
+        
+        // Trava do chão (para não atravessar o piso do castelo)
+        if (camY < 2.0f) {
+            camY = 2.0f; 
+        }
+    }
 
-    if(key == GLUT_KEY_DOWN)
-        xRot -= 5.0f;
-
-    // evita que xRot tome um valor muito alto
-    xRot = (GLfloat)((const int)xRot % 360);  
-
-    // apagar a tela e rodar RenderScene de novo
+    // Atualiza a direção que estamos olhando
+    atualizaVetorVisao();
     glutPostRedisplay();  
 }
 
@@ -164,11 +233,14 @@ void RenderScene(void) {
     // limpa a janela
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  
   
-    // move a area pra "desenhar" pra não ficar em cima da câmera
-    glPushMatrix();
-	glTranslatef(0.0f, yCam, -5.0f);  
-	glRotatef(yRot, 0.0f, 1.0f, 0.0f);
-    glRotatef(xRot, 1.0f, 0.0f, 0.0f);
+    glLoadIdentity(); // Reseta as matrizes de modelo e visão
+
+    // Define a câmera livre
+    gluLookAt(
+        camX, camY, camZ,                         // Aonde a câmera está
+        camX + lookX, camY + lookY, camZ + lookZ, // Para onde ela está olhando
+        0.0f, 1.0f, 0.0f                          // Onde é o "cima" (eixo Y)
+    );
 
 	//desenhaEixos();
 
@@ -179,7 +251,7 @@ void RenderScene(void) {
 	glColor3f(COLOR(0x68, 0x6c, 0x54));
 	glPushMatrix();
         glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
-		glTranslatef(0.0f, -5.0f, 0.0f);
+		glTranslatef(0.0f, chaoY, 0.0f);
 		gluDisk(pObj, 0.0f, 10.0f, 20, 10);
 	glPopMatrix();
 
@@ -551,8 +623,7 @@ void RenderScene(void) {
 
     // deleta a quadrica criada
     gluDeleteQuadric(pObj);
-    // volta na posicao global
-    glPopMatrix();  
+
     // mostra a tela
     glutSwapBuffers();  
 
