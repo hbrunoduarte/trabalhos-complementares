@@ -3,6 +3,8 @@
 
 #include <GL/glut.h>
 
+#define COLOR(r,g,b) r/255.0,g/255.0,b/255.0
+
 static GLfloat yRot = 0.0f;
 static GLfloat xRot = 0.0f;
 static GLfloat yCam = -1.0f;
@@ -73,18 +75,42 @@ void SpecialKeys(int key, int x, int y) {
     glutPostRedisplay();  
 }
 
-void RenderScene(void) {
-    GLUquadricObj *pObj = gluNewQuadric();
+void desenhaEixos() {
+    float tamanho = 10.0f; // Define o comprimento das linhas
 
-    // limpa a janela
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  
-  
-    // move a area pra "desenhar" pra não ficar em cima da câmera
-    glPushMatrix();
-	glTranslatef(0.0f, yCam, -5.0f);  
-	glRotatef(yRot, 0.0f, 1.0f, 0.0f);
-    glRotatef(xRot, 1.0f, 0.0f, 0.0f);
+    // Desativa a iluminação temporariamente se você estiver usando, 
+    // para garantir que as cores dos eixos fiquem puras e brilhantes.
+    glDisable(GL_LIGHTING); 
 
+    // Aumenta a espessura da linha para ficar mais fácil de ver
+    glLineWidth(2.0f); 
+
+    glBegin(GL_LINES);
+    
+        // Eixo X (Vermelho) - Vai da origem (0,0,0) para a direita
+        glColor3f(1.0f, 0.0f, 0.0f);
+        glVertex3f(0.0f, 0.0f, 0.0f);
+        glVertex3f(tamanho, 0.0f, 0.0f);
+
+        // Eixo Y (Verde) - Vai da origem (0,0,0) para cima
+        glColor3f(0.0f, 1.0f, 0.0f);
+        glVertex3f(0.0f, 0.0f, 0.0f);
+        glVertex3f(0.0f, tamanho, 0.0f);
+
+        // Eixo Z (Azul) - Vai da origem (0,0,0) "para fora" da tela, na sua direção
+        glColor3f(0.0f, 0.0f, 1.0f);
+        glVertex3f(0.0f, 0.0f, 0.0f);
+        glVertex3f(0.0f, 0.0f, tamanho);
+        
+    glEnd();
+
+    // Restaura a espessura da linha para o padrão
+    glLineWidth(1.0f);
+    
+    glEnable(GL_LIGHTING); // Reative a iluminação se estiver usando
+}
+
+void createSnowman(GLUquadricObj *pObj) {
     // -- CABECA --
 
 	// cor branca
@@ -201,8 +227,72 @@ void RenderScene(void) {
             gluDisk(pObj, 0.0f, 0.16f, 26, 1);
         glPopMatrix();
     glPopMatrix();
+}
 
-    
+void createSnowGlobe(GLUquadricObj *pObj) {
+
+    // Base do Globo
+
+    glColor3f(COLOR(0,0,0));
+    glPushMatrix();
+
+        // Tronco de Cone para as laterais
+        glPushMatrix();    
+            glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+            glTranslatef(0.0f, 0.0f, -0.6f);
+            glDisable(GL_CULL_FACE);
+            gluCylinder(pObj, 1.0f, 0.8f, 0.3f, 40, 40);
+            glEnable(GL_CULL_FACE);
+        glPopMatrix();
+
+        // Disco para fechar o tronco inferiormente
+        glPushMatrix();
+            glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+            glTranslatef(0.0f, 0.0f, -0.6f);
+            glDisable(GL_CULL_FACE);
+            gluDisk(pObj, 0.0f, 1.0f, 40, 40);
+            glEnable(GL_CULL_FACE);
+        glPopMatrix();
+    glPopMatrix();
+
+    // Globo
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Impede que a esfera escreva no depth buffer (mas ela ainda lê dele)
+    glDepthMask(GL_FALSE); 
+
+    glColor4f(COLOR(0xFF, 0xFF, 0xFF), 0.3f);
+    glPushMatrix();
+        glTranslatef(0.0f, 0.6f, 0.0f);
+        glutSolidSphere(1.2f, 70, 70);
+    glPopMatrix();
+
+    // Restaura as configurações para o próximo frame
+    glDepthMask(GL_TRUE); 
+    glDisable(GL_BLEND);
+
+}
+
+void RenderScene(void) {
+    GLUquadricObj *pObj = gluNewQuadric();
+
+    // limpa a janela
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  
+    glDepthMask(GL_TRUE);
+  
+    // move a area pra "desenhar" pra não ficar em cima da câmera
+    glPushMatrix();
+	glTranslatef(0.0f, yCam, -8.0f);  
+	glRotatef(yRot, 0.0f, 1.0f, 0.0f);
+    glRotatef(xRot, 1.0f, 0.0f, 0.0f);
+
+    desenhaEixos();
+
+    createSnowman(pObj);
+
+    createSnowGlobe(pObj);
 
     ////////////////////////////////////////////
 
