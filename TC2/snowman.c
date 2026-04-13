@@ -2,6 +2,8 @@
 // para compilar e executar
 
 #include <GL/glut.h>
+#include <stdlib.h>
+#include <time.h>
 #include <math.h>
 
 #ifndef M_PI
@@ -13,7 +15,7 @@
 #define TAM_GRADE_NEVE_GLOBO 60
 #define TAM_PASSO_NEVE_GLOBO 0.05f
 
-float alturas[TAM_GRADE_NEVE_GLOBO][TAM_GRADE_NEVE_GLOBO];
+float snowHeights[TAM_GRADE_NEVE_GLOBO][TAM_GRADE_NEVE_GLOBO];
 
 #define GLOBE_RADIUS 1.2f
 
@@ -276,7 +278,7 @@ void createSnowman(GLUquadricObj *pObj) {
     glPopMatrix();
 }
 
-void gerarNeve(float raioBase) {
+void createSnow(float raioBase) {
     srand(time(NULL));
     for(int x = 0; x < TAM_GRADE_NEVE_GLOBO; x++) {
         for(int z = 0; z < TAM_GRADE_NEVE_GLOBO; z++) {
@@ -284,12 +286,12 @@ void gerarNeve(float raioBase) {
             float ruido = ((rand() % 100) / 100.0f) * 0.08f; 
             
             // Altura base fixada em -0.15f para afundar a base do boneco na neve
-            alturas[x][z] = -0.15f + ruido; 
+            snowHeights[x][z] = -0.15f + ruido; 
         }
     }
 }
 
-void desenharNeve(float raioBase) {
+void drawSnow(float raioBase) {
     glColor3f(1.0f, 1.0f, 1.0f); // Cor branca para a neve
 
     for(int z = 0; z < TAM_GRADE_NEVE_GLOBO - 1; z++) {
@@ -307,7 +309,7 @@ void desenharNeve(float raioBase) {
                 mz1 = (mz1 / dist1) * raioBase; 
             }
             glNormal3f(0.0f, 1.0f, 0.0f); // Aponta a normal para cima para o reflexo da luz
-            glVertex3f(mx1, alturas[x][z], mz1);
+            glVertex3f(mx1, snowHeights[x][z], mz1);
 
             // --- CÁLCULO DO PONTO DA FRENTE ---
             float mx2 = (x - TAM_GRADE_NEVE_GLOBO / 2.0f) * TAM_PASSO_NEVE_GLOBO;
@@ -320,7 +322,7 @@ void desenharNeve(float raioBase) {
                 mz2 = (mz2 / dist2) * raioBase;
             }
             glNormal3f(0.0f, 1.0f, 0.0f);
-            glVertex3f(mx2, alturas[x][z+1], mz2);
+            glVertex3f(mx2, snowHeights[x][z+1], mz2);
         }
         glEnd();
     }
@@ -346,7 +348,6 @@ void initSnowFlakes() {
 }
 
 void drawSnowFlakes() {
-    glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
@@ -354,18 +355,17 @@ void drawSnowFlakes() {
         glScalef(1.2f, 1.2f, 1.2f);
         glTranslatef(0.0f, 0.6f, 0.0f);
 
-        glPointSize(3.0f);
+        glPointSize(2.0f);
         glBegin(GL_POINTS);
         for (int i = 0; i < MAX_PARTICLES; i++) {
             if (particles[i].stage != GROUND) {
-                glColor3f(COLOR(0xFF, 0xFF, 0xFF));
+                glColor4f(COLOR(0xFF, 0xFF, 0xFF), 0.7f);
                 glVertex3f(particles[i].x, particles[i].y, particles[i].z);
             }
         }
         glEnd();
-    glPopMatrix(); // Finaliza a transformação da neve
+    glPopMatrix();
 
-    glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
 }
 
@@ -398,28 +398,27 @@ void shakeGlobe() {
     }
 }
 
-void updateSnowflakes3D(float deltaTime) {
+void updateSnowflakes(float deltaTime) {
     for (int i = 0; i < MAX_PARTICLES; i++) {
         
-        // --- ESTADO 1: UP (Subindo pelo vidro 3D) ---
         if (particles[i].stage == UP) {
 
-            float upSpeed = 2.0f;
+            float upSpeed = 0.5f + ((float)(rand() % 100) / 100.0f) * 1.5f;
             particles[i].elevation += upSpeed * deltaTime;
             
-            particles[i].x = GLOBE_RADIUS * cos(particles[i].elevation) * cos(particles[i].azimuth);
-            particles[i].y = GLOBE_RADIUS * sin(particles[i].elevation);
-            particles[i].z = GLOBE_RADIUS * cos(particles[i].elevation) * sin(particles[i].azimuth);
-            
+            particles[i].x = (0.9 * GLOBE_RADIUS) * cos(particles[i].elevation) * cos(particles[i].azimuth);
+            particles[i].y = (0.9 * GLOBE_RADIUS) * sin(particles[i].elevation);
+            particles[i].z = (0.9 * GLOBE_RADIUS) * cos(particles[i].elevation) * sin(particles[i].azimuth);
+
             if (particles[i].y >= GLOBE_RADIUS * 0.8f) {
                 particles[i].stage = DRIFT;
-                particles[i].driftTimer = 0.3f;
+                particles[i].driftTimer = ((rand() % 10)/10.0 + 0.1) * 0.3f;
                 particles[i].verticalMomentum = 0.4f;
             }
         }
         
         else if (particles[i].stage == DRIFT) {
-
+            
             particles[i].x *= (1.0f - 2.0f * deltaTime); 
             particles[i].z *= (1.0f - 2.0f * deltaTime); 
             
@@ -443,8 +442,9 @@ void updateSnowflakes3D(float deltaTime) {
                                (particles[i].y * particles[i].y) + 
                                (particles[i].z * particles[i].z);
                                
-            if (distanceSq >= GLOBE_RADIUS * GLOBE_RADIUS && particles[i].y < -0.1f) {
-                particles[i].stage = GROUND;
+            if (distanceSq >= ((GLOBE_RADIUS-0.01f) * (GLOBE_RADIUS-0.01f))) {
+                if (particles[i].y < 1.0f)
+                    particles[i].stage = GROUND;
                 // Para não vazar o vidro, normalizamos o vetor (X,Y,Z) e multiplicamos pelo raio
                 float dist = sqrt(distanceSq);
                 particles[i].x = (particles[i].x / dist) * GLOBE_RADIUS;
@@ -519,20 +519,20 @@ void RenderScene(void) {
 	glRotatef(yRot, 0.0f, 1.0f, 0.0f);
     glRotatef(xRot, 1.0f, 0.0f, 0.0f);
 
-    desenhaEixos();
+    // desenhaEixos();
 
     createSnowman(pObj);
 
     glPushMatrix();
         for (float h = 1.15f; h > 0.8f; h -= 0.01f) {
-            desenharNeve(h);
+            drawSnow(h);
             
             // Move 0.01 unidades para baixo no eixo Y para a PRÓXIMA camada
             glTranslatef(0.0f, -0.01f, 0.0f); 
         }
     glPopMatrix();
 
-    updateSnowflakes3D(0.01);
+    updateSnowflakes(0.01);
     drawSnowFlakes();
 
     createSnowGlobe(pObj);
@@ -582,7 +582,7 @@ void init() {
     // cor que será usada para "apagar" os frames (cor de fundo)
     glClearColor(0.25f, 0.25f, 0.50f, 1.0f);
     
-    gerarNeve(1.15f);
+    createSnow(1.15f);
     initSnowFlakes();
 }
 
