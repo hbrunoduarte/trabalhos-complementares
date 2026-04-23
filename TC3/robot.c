@@ -11,24 +11,49 @@
 static bool animacaoAndar = false;
 static bool animacaoTchau = false;
 static float tempoAnim = 0.0f;
+static float tempoTchau = 0.0f;
 
 static GLfloat yRot = 0.0f;
 static GLfloat xRot = 0.0f;
 static GLfloat yCam = -1.0f;
 
 static GLfloat angOmbroDirX = 0.0f;
-static GLfloat angOmbroDirZ = 0.0f;
+static GLfloat angOmbroDirZ = 0.0f;  
 static GLfloat angCotoveloDirX = 0.0f;
-static GLfloat angOmbroEsqX = 0.0f;
-static GLfloat angCotoveloEsqX = 0.0f;
+static GLfloat angOmbroEsqX = 0.0f;   
+static GLfloat angCotoveloEsqX = 0.0f; 
 
-static GLfloat angCoxaDirX = 0.0f;
+static GLfloat angCoxaDirX = 0.0f;     
 static GLfloat angJoelhoDirX = 0.0f;
-static GLfloat angCoxaEsqX = 0.0f;
-static GLfloat angJoelhoEsqX = 0.0f;
+static GLfloat angCoxaEsqX = 0.0f; 
+static GLfloat angJoelhoEsqX = 0.0f;   
+
+void resetaAngulos() {
+    angOmbroDirX = 0.0f;
+    angOmbroEsqX = 0.0f;
+    angOmbroDirZ = 0.0f;
+    angCotoveloDirX = 0.0f;
+    angCotoveloEsqX = 0.0f;
+    angCoxaDirX = 0.0f; 
+    angCoxaEsqX = 0.0f;
+    angJoelhoDirX = 0.0f; 
+    angJoelhoEsqX = 0.0f;
+}
 
 void atualizaAnimacao(int value) {
-    if(animacaoAndar) {
+    if(animacaoTchau) {
+        tempoTchau += 0.1f;
+
+        angOmbroDirX = -140.0f;
+        angOmbroDirZ = 20.0f + (sin(tempoTchau * 2.0f) * 30.0f);
+
+        if(tempoTchau > 10.0f) {
+            animacaoTchau = false;
+            tempoTchau = 0.0f;
+            resetaAngulos();
+        }
+
+    } else if(animacaoAndar) {
         tempoAnim += 0.15f;
 
         angCoxaDirX = sin(tempoAnim) * 30.0f;
@@ -39,23 +64,6 @@ void atualizaAnimacao(int value) {
 
         angOmbroDirX = sin(tempoAnim) * 30.0f;
         angOmbroEsqX = sin(tempoAnim + PI) * 30.0f;
-
-    } else if(animacaoTchau) {
-        tempoAnim += 0.2f;
-
-        // Joga o braço lá pro alto (-140 graus) e faz ele oscilar 20 graus pra lá e pra cá
-        angOmbroDirX = -140.0f;
-        angOmbroDirZ = 20.0f + (sin(tempoAnim) * 30.0f);
-        
-        // Garante que o resto do corpo fique perfeitamente parado
-        angOmbroEsqX = 0.0f;
-        angCotoveloDirX = 0.0f;
-        angCotoveloEsqX = 0.0f;
-        angCoxaDirX = 0.0f; 
-        angCoxaEsqX = 0.0f;
-        angJoelhoDirX = 0.0f; 
-        angJoelhoEsqX = 0.0f;
-
     }
     
 
@@ -102,25 +110,24 @@ void NormalKeys(unsigned char key, int x, int y) {
 
     if(key == '1') {
         animacaoAndar = !animacaoAndar;
+        if(animacaoAndar) {
+            animacaoTchau = false;
+        } else {
+            if(!animacaoAndar) resetaAngulos();
+        }
     }
 
     if(key == '2') {
-        animacaoTchau = !animacaoTchau;
+        animacaoTchau = true;
+        animacaoAndar = false;
+        tempoTchau = 0.0f;
+        resetaAngulos();
     }
 
     if(key == '3') {
         animacaoAndar = false;
         animacaoTchau = false;
-        
-        angOmbroDirX = 0.0f; 
-        angOmbroDirZ = 0.0f;
-        angOmbroEsqX = 0.0f;
-        angCotoveloDirX = 0.0f; 
-        angCotoveloEsqX = 0.0f;
-        angCoxaDirX = 0.0f; 
-        angCoxaEsqX = 0.0f;
-        angJoelhoDirX = 0.0f; 
-        angJoelhoEsqX = 0.0f;
+        resetaAngulos();
     }
 
     // controle da câmera original
