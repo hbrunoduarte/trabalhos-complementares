@@ -30,22 +30,23 @@ typedef struct {
     float x, y, z;
     Stage stage;
     
-    // Variáveis do estado UP
+    // Variáveis do estágio UP
     float elevation; // Ângulo de subida (de -PI/2 no fundo até +PI/2 no topo)
     float azimuth;   // Ângulo ao redor do globo (de 0 a 2*PI)
     
+    // Variáveis do estágio Drift
     float driftTimer;
     float verticalMomentum;
     
-    // Variáveis do estado DOWN
+    // Variáveis do estágio DOWN
     float fallSpeed;
-    float flutter;
     float flutterAngle;
 
     float freqX, freqZ, ampX, ampZ;
 } SnowFlake;
 
-#define MAX_PARTICLES 500
+#define MAX_PARTICLES 1000
+#define AVERAGE_PARTICLES 500
 
 SnowFlake particles[MAX_PARTICLES];
 
@@ -286,13 +287,13 @@ void createSnow(float raioBase) {
             float ruido = ((rand() % 100) / 100.0f) * 0.08f; 
             
             // Altura base fixada em -0.15f para afundar a base do boneco na neve
-            snowHeights[x][z] = -0.15f + ruido; 
+            snowHeights[x][z] = -0.15f + ruido;
         }
     }
 }
 
 void drawSnow(float raioBase) {
-    glColor3f(1.0f, 1.0f, 1.0f); // Cor branca para a neve
+    glColor3f(1.0f, 1.0f, 1.0f);
 
     for(int z = 0; z < TAM_GRADE_NEVE_GLOBO - 1; z++) {
         glBegin(GL_TRIANGLE_STRIP);
@@ -328,25 +329,6 @@ void drawSnow(float raioBase) {
     }
 }
 
-void initSnowFlake(SnowFlake *p) {
-    p->x = p->y = p->z = 0.0f;
-
-    p->fallSpeed = 0.05f;
-
-    p->flutterAngle = p->flutter = 1.2f;
-
-    p->elevation = p->azimuth = 0.0f;
-
-    p->driftTimer = p->verticalMomentum = 0.0f;
-
-    p->stage = GROUND;
-}
-
-void initSnowFlakes() {
-    for (int i = 0; i < MAX_PARTICLES; i++)
-        initSnowFlake(particles + i);
-}
-
 void drawSnowFlakes() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -355,11 +337,11 @@ void drawSnowFlakes() {
         glScalef(1.2f, 1.2f, 1.2f);
         glTranslatef(0.0f, 0.6f, 0.0f);
 
-        glPointSize(2.0f);
+        glPointSize(3.0f);
         glBegin(GL_POINTS);
         for (int i = 0; i < MAX_PARTICLES; i++) {
             if (particles[i].stage != GROUND) {
-                glColor4f(COLOR(0xFF, 0xFF, 0xFF), 0.7f);
+                glColor4f(COLOR(0xFF, 0xFF, 0xFF), 0.5f);
                 glVertex3f(particles[i].x, particles[i].y, particles[i].z);
             }
         }
@@ -370,28 +352,33 @@ void drawSnowFlakes() {
 }
 
 void shakeGlobe() {
-    for (int i = 0; i < MAX_PARTICLES; i++) {
+    int particlesToShake = ((rand() % 100)/100.0) * MAX_PARTICLES;
+    if (particlesToShake < AVERAGE_PARTICLES)
+        particlesToShake = AVERAGE_PARTICLES;
+
+    int shakedParticles = 0;
+    for (int i = 0; i < MAX_PARTICLES && shakedParticles < particlesToShake; i++) {
         if (particles[i].stage == GROUND) {
+
+            shakedParticles++;
+
             particles[i].stage = UP;
             
-            // NOVO: Adiciona uma variação aleatória para não subirem em anel
+            // Adiciona uma variação aleatória para não subirem em anel
             float randomOffset = ((float)(rand() % 100) / 100.0f) * (M_PI / 4.0f);
             particles[i].elevation = -M_PI / 2.0f + randomOffset; 
             
             particles[i].azimuth = ((float)(rand() % 360)) * (M_PI / 180.0f);
 
             particles[i].fallSpeed = 0.5f + ((float)(rand() % 100) / 100.0f) * 1.5f;
-            
 
             particles[i].flutterAngle = ((float)(rand() % 360)) * (M_PI / 180.0f);
             
-            // FREQUÊNCIAS: Cada floco tem sua própria curva de Lissajous
-            // X varia de 0.8 a 1.5 / Z varia de 1.1 a 1.8
+            // Cada floco tem sua própria curva
             particles[i].freqX = 0.8f + ((float)(rand() % 100) / 100.0f) * 0.7f;
             particles[i].freqZ = 1.1f + ((float)(rand() % 100) / 100.0f) * 0.7f;
             
-            // AMPLITUDES: Alguns flocos vão longe, outros caem quase retos
-            // Varia entre 0.3 e 1.3
+            // Alguns flocos vão longe, outros caem quase retos
             particles[i].ampX = 0.3f + ((float)(rand() % 100) / 100.0f) * 1.0f;
             particles[i].ampZ = 0.3f + ((float)(rand() % 100) / 100.0f) * 1.0f;
         }
@@ -489,7 +476,7 @@ void createSnowGlobe(GLUquadricObj *pObj) {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // Impede que a esfera escreva no depth buffer (mas ela ainda lê dele)
+    // Impede que a esfera escreva no depth buffer
     glDepthMask(GL_FALSE); 
 
     glColor4f(COLOR(0xFF, 0xFF, 0xFF), 0.3f);
@@ -583,7 +570,6 @@ void init() {
     glClearColor(0.25f, 0.25f, 0.50f, 1.0f);
     
     createSnow(1.15f);
-    initSnowFlakes();
 }
 
 void timer(int value) {
