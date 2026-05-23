@@ -12,10 +12,11 @@
 
 #define PI 3.14159f
 
-static GLfloat yRot = 0.0f;
+static GLfloat yRot = -90.0f;
 static GLfloat xRot = 0.0f;
-static GLfloat yCam = -1.0f;
-static GLfloat zCam = -5.0f;
+static GLfloat xCam = 0.0f;
+static GLfloat yCam = -0.002f;
+static GLfloat zCam = -0.70f;
 
 fastObjMesh* livroMesh = NULL;
 GLuint texturas[20];
@@ -52,11 +53,13 @@ void NormalKeys(unsigned char key, int x, int y) {
     // 27 é o código ascii para a tecla esc
     if (key == 27) exit(0);
     // controle da câmera original
-    if(key == 'w' || key == 'W') yCam -= 0.1f;
-    if(key == 's' || key == 'S') yCam += 0.1f;
+    if(key == 'w' || key == 'W') yCam -= 0.03f;
+    if(key == 's' || key == 'S') yCam += 0.03f;
+    if(key == 'a' || key == 'A') xCam += 0.03f; 
+    if(key == 'd' || key == 'D') xCam -= 0.03f; 
     // controle do zoom
-    if(key == '+' || key == '=') zCam += 0.5f; // zoom in
-    if(key == '-' || key == '_') zCam -= 0.5f; // zoom out
+    if(key == 'e' || key == 'E') zCam += 0.5f;
+    if(key == 'q' || key == 'Q') zCam -= 0.5f;
 
     glutPostRedisplay();
 }
@@ -88,9 +91,10 @@ void RenderScene(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  
   
     glPushMatrix();
-    glTranslatef(0.0f, yCam, zCam);  
+    glTranslatef(xCam, yCam, zCam);  
     glRotatef(yRot, 0.0f, 1.0f, 0.0f);
     glRotatef(xRot, 1.0f, 0.0f, 0.0f);
+    glRotatef(-90, 0.0f, 0.0f, 1.0f);
 
     // DESENHANDO O LIVRO
     glColor3f(1.0f, 1.0f, 1.0f); 
