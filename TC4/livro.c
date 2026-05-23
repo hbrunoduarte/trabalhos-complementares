@@ -1,4 +1,4 @@
-// gcc robot.c -lglut -lGL -lGLU -lm -o robot.out && ./robot.out
+// gcc livro.c -lglut -lGL -lGLU -lm -o livro.out && ./livro.out
 // para compilar e executar
 
 #include <GL/glut.h>
@@ -58,8 +58,8 @@ void NormalKeys(unsigned char key, int x, int y) {
     if(key == 'a' || key == 'A') xCam += 0.03f; 
     if(key == 'd' || key == 'D') xCam -= 0.03f; 
     // controle do zoom
-    if(key == 'e' || key == 'E') zCam += 0.5f;
-    if(key == 'q' || key == 'Q') zCam -= 0.5f;
+    if(key == 'e' || key == 'E') zCam += 0.1f;
+    if(key == 'q' || key == 'Q') zCam -= 0.1f;
 
     glutPostRedisplay();
 }
