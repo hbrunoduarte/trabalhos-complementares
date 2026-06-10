@@ -7,7 +7,7 @@ LIBS = -lGLEW -lglfw -lGL -lGLU -lm
 SRCS = $(wildcard *.c)
 
 # Nome do executável
-TARGET_SOLAR = solar.out
+TARGET_SOLAR = main.out
 
 # Regras de Compilação
 $(TARGET_SOLAR): $(SRCS)

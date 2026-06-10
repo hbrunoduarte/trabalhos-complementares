@@ -55,9 +55,9 @@ int main() {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LIGHTING);
 
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(45.0f, 800.0f / 600.0f, 0.1f, 200.0f);
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    framebufferSizeCallback(window, width, height);
     
     EsferaMesh *terraMesh = criarEsferaArray(1.0f, 60, 60);
     int totalVertices = terraMesh->numVertices;
