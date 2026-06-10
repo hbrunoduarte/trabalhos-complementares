@@ -11,9 +11,8 @@ float lastX = 400.0, lastY = 300.0;
 booleano running = 1;
 
 // Posição do jogador no mundo (x, y, z)
-vector camera = {0.0f, 0.0f, 5.0f};
+vector camera = {60.0f, 0.0f, 5.0f};
 vector cameraFront = {0.0f, 0.0f, 0.0f};
-float camStep = 0.05f;
 
 float yaw = -90.0f; // esquerda/direita
 float pitch = 0.0f; // cima/baixo
@@ -124,6 +123,52 @@ void updateCamera(GLFWwindow *window) {
     );
 }
 
+char* lerArquivo(const char *caminho) {
+
+    FILE *file = fopen(caminho, "rb");
+    if (!file) {
+        fprintf(stderr, "Erro ao abrir arquivo %s\n", caminho);
+        exit(-1);
+    }
+
+    fseek(file, 0, SEEK_END);
+    long tamArquivo = ftell(file);
+    rewind(file);
+
+    char *conteudo = malloc(tamArquivo + 1);
+    if (!conteudo) {
+        fprintf(stderr, "Erro de alocação de memória.\n");
+        fclose(file);
+        return NULL;
+    }
+
+    size_t elementosLidos = fread(conteudo, sizeof(char), tamArquivo, file);
+    conteudo[elementosLidos] = '\0';
+
+    fclose(file);
+    return conteudo;
+}
+
+GLuint carregarShader(const char *vertexShaderSource, const char *fragShaderSource) {
+    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+    glCompileShader(vertexShader);
+
+    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fragShaderSource, NULL);
+    glCompileShader(fragmentShader);
+
+    GLuint shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
+
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+    return shaderProgram;
+}
+
 GLuint carregarTextura(const char* caminho) {
     GLuint texturaID;
     glGenTextures(1, &texturaID);
@@ -185,7 +230,7 @@ EsferaMesh* criarEsferaArray(float r, unsigned int pTheta, unsigned int pPhi) {
     // 2 triângulos * 3 vértices cada = 6 vértices por quadrado.
     malha->numVertices = pPhi * pTheta * 6;
     
-    // Cada vértice ocupa 6 floats na memória (3 de posição + 3 de normal + 2 de textura)
+    // Cada vértice ocupa 6 floats na memória (3 de posição + 3 de normal + 2 de textura + 3 de normal mapping)
     malha->dados = malloc(malha->numVertices * SPHERE_INFO * sizeof(float));
     
     int index = 0;
@@ -220,7 +265,7 @@ EsferaMesh* criarEsferaArray(float r, unsigned int pTheta, unsigned int pPhi) {
         }
     }
     
-    return malha; // Retorna o array carregado
+    return malha;
 }
 
 void initLighting() {
@@ -230,7 +275,7 @@ void initLighting() {
 
     GLfloat luzAmbiente[] = { 0.2f, 0.2f, 0.2f, 1.0f }; 
     GLfloat luzDifusa[]   = { 0.8f, 0.8f, 0.8f, 1.0f }; 
-    GLfloat luzPosicao[]  = { 5.0f, 5.0f, 5.0f, 0.0f }; 
+    GLfloat luzPosicao[]  = { 0.0f, 0.0f, 0.0f, 0.0f }; 
 
     glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, luzDifusa);
@@ -268,13 +313,15 @@ int main() {
     glfwSetScrollCallback(window, scrollCallback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    initLighting();
+    //initLighting();
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_LIGHTING);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(45.0f, 800.0f / 600.0f, 0.1f, 100.0f);
+    gluPerspective(45.0f, 800.0f / 600.0f, 0.1f, 200.0f);
     
-    EsferaMesh *terraMesh = criarEsferaArray(1.0f, 40, 40);
+    EsferaMesh *terraMesh = criarEsferaArray(1.0f, 60, 60);
     
     // Guardamos o número de vértices pois vamos deletar a struct em seguida
     int totalVertices = terraMesh->numVertices;

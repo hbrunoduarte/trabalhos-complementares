@@ -6,10 +6,11 @@
 #include <GL/glu.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 #include "vector.h"
 
-#define SPHERE_INFO 11
+#define BUFFER_LEITURA_ARQUIVO 1024
 
 #define booleano char
 
@@ -19,11 +20,8 @@
 
 #define DEG2RAD (M_PI / 180.0f)
 
-typedef struct {
-    float *dados;
-    int numVertices;
-} EsferaMesh;
-
+char* lerArquivo(const char *caminho);
+GLuint carregarShader(const char *vertexShaderSource, const char *fragShaderSource);
 GLuint carregarTextura(const char* caminho);
 
 #endif
