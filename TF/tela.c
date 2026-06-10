@@ -85,6 +85,21 @@ void processarInput(GLFWwindow *window) {
     }
 }
 
+void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
+
+    if (height == 0) return; 
+
+    glViewport(0, 0, width, height);
+
+    float proporcaoAtual = (float)width / (float)height;
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(45.0f, proporcaoAtual, 0.1f, 200.0f);
+
+    glMatrixMode(GL_MODELVIEW);
+}
+
 GLFWwindow* configurarTela() {
 
     if (!glfwInit()) {
@@ -99,7 +114,7 @@ GLFWwindow* configurarTela() {
         glfwTerminate();
         exit(-1);
     }
-
+    
     glfwMakeContextCurrent(window);
 
     glewExperimental = GL_TRUE; 
@@ -108,6 +123,7 @@ GLFWwindow* configurarTela() {
         exit(-1);
     }
 
+    glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
     glfwSetCursorPosCallback(window, mouseCallback);
     glfwSetScrollCallback(window, scrollCallback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
