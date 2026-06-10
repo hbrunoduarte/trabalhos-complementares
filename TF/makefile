@@ -3,13 +3,15 @@ CC = gcc
 CFLAGS = -Wall
 LIBS = -lGLEW -lglfw -lGL -lGLU -lm
 
-# Nomes dos executáveis
+# Encontra magicamente TODOS os arquivos .c no diretório atual
+SRCS = $(wildcard *.c)
+
+# Nome do executável
 TARGET_SOLAR = solar.out
 
 # Regras de Compilação
-
-$(TARGET_SOLAR): solar.c
-	$(CC) $(CFLAGS) solar.c vector.c terra.c sol.c $(LIBS) -o $(TARGET_SOLAR)
+$(TARGET_SOLAR): $(SRCS)
+	$(CC) $(CFLAGS) $(SRCS) $(LIBS) -o $(TARGET_SOLAR)
 
 run: $(TARGET_SOLAR)
 	./$(TARGET_SOLAR)
