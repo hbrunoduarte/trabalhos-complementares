@@ -1,37 +1,9 @@
-#include <GLFW/glfw3.h>
-#include <GL/glu.h>
-#include <stdio.h>
-#include <math.h>
+#include "solar.h"
+#include "terra.h"
+#include "sol.h"
 
-#define booleano char
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
-#define DEG2RAD (M_PI / 180.0f)
-
-typedef struct {
-    float x;
-    float y;
-    float z;
-} vector;
-
-vector addVectors(vector u, vector v) {
-    vector sum;
-    sum.x = u.x + v.x;
-    sum.y = u.y + v.y;
-    sum.z = u.z + v.z;
-    return sum;
-}
-
-vector mulVector(vector u, float alpha) {
-    vector mul;
-    mul.x = u.x * alpha;
-    mul.y = u.y * alpha;
-    mul.z = u.z * alpha;
-    return mul;
-}
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -152,47 +124,103 @@ void updateCamera(GLFWwindow *window) {
     );
 }
 
+GLuint carregarTextura(const char* caminho) {
+    GLuint texturaID;
+    glGenTextures(1, &texturaID);
+    glBindTexture(GL_TEXTURE_2D, texturaID);
 
-void criarEsfera(GLfloat r, unsigned int pTheta, unsigned int pPhi) {
+    // Configura o comportamento da textura (Filtro Suave e Repetição)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	float theta = 0.0f, phi = 0.0f;
+    // O OpenGL inverte o eixo Y em relação às imagens comuns, então pedimos ao stb para consertar
+    stbi_set_flip_vertically_on_load(1);
+
+    int largura, altura, canaisCores;
+    // Carrega os pixels da imagem para a memória RAM
+    unsigned char *dados = stbi_load(caminho, &largura, &altura, &canaisCores, 0);
     
-    // Passo (incremento) de cada ângulo baseado na quantidade de subdivisões
-    float dTheta = (float)(2.0 * M_PI / pTheta); // 360 graus
-    float dPhi = (float)(M_PI / pPhi);           // 180 graus
-
-    // Loop externo percorre a latitude (de cima para baixo)
-    for (unsigned int i = 0; i < pPhi; ++i) {
-        phi = i * dPhi;
-        float proximoPhi = (i + 1) * dPhi;
-
-        // Inicia uma nova faixa de polígonos
-        glBegin(GL_QUAD_STRIP);
-        
-        // Loop interno percorre a longitude (dando a volta na esfera)
-        // Usamos <= pTheta para garantir que a volta se feche perfeitamente
-        for (unsigned int j = 0; j <= pTheta; ++j) {
-            theta = j * dTheta;
-
-            // Vértice 1 (Latitude atual)
-            float x1 = r * sin(phi) * cos(theta);
-            float y1 = r * cos(phi);
-            float z1 = r * sin(phi) * sin(theta);
-            
-            glNormal3f(x1/r, y1/r, z1/r);
-            glVertex3f(x1, y1, z1);
-
-            // Vértice 2 (Próxima latitude)
-            float x2 = r * sin(proximoPhi) * cos(theta);
-            float y2 = r * cos(proximoPhi);
-            float z2 = r * sin(proximoPhi) * sin(theta);
-            
-            glNormal3f(x2/r, y2/r, z2/r);
-            glVertex3f(x2, y2, z2);
-        }
-        
-        glEnd();
+    if (dados) {
+        // Envia para a GPU
+        GLenum formato = (canaisCores == 4) ? GL_RGBA : GL_RGB;
+        glTexImage2D(GL_TEXTURE_2D, 0, formato, largura, altura, 0, formato, GL_UNSIGNED_BYTE, dados);
+    } else {
+        printf("Falha ao carregar a textura: %s\n", caminho);
     }
+    
+    // Libera a memória RAM, pois a GPU já guardou a imagem
+    stbi_image_free(dados);
+
+    return texturaID;
+}
+
+
+void addVertice(float* array, int* index, float r, float phi, float theta) {
+    float x = r * sin(phi) * cos(theta);
+    float y = r * cos(phi);
+    float z = r * sin(phi) * sin(theta);
+    
+    array[(*index)++] = x;
+    array[(*index)++] = y;
+    array[(*index)++] = z;
+    
+    array[(*index)++] = x / r;
+    array[(*index)++] = y / r;
+    array[(*index)++] = z / r;
+
+    array[(*index)++] = 1.0f - theta / (2.0f * M_PI);
+    array[(*index)++] = 1.0f - phi / M_PI;
+
+    array[(*index)++] = -sin(theta);
+    array[(*index)++] = 0.0f;
+    array[(*index)++] = cos(theta);
+}
+
+EsferaMesh* criarEsferaArray(float r, unsigned int pTheta, unsigned int pPhi) {
+    EsferaMesh *malha = malloc(sizeof(EsferaMesh));
+    
+    // Cada "quadrado" na malha da esfera precisa de 2 triângulos.
+    // 2 triângulos * 3 vértices cada = 6 vértices por quadrado.
+    malha->numVertices = pPhi * pTheta * 6;
+    
+    // Cada vértice ocupa 6 floats na memória (3 de posição + 3 de normal + 2 de textura)
+    malha->dados = malloc(malha->numVertices * SPHERE_INFO * sizeof(float));
+    
+    int index = 0;
+    float dTheta = (float)(2.0 * M_PI / pTheta);
+    float dPhi = (float)(M_PI / pPhi);
+
+    // Loop externo (Latitude)
+    for (unsigned int i = 0; i < pPhi; ++i) {
+        float phi1 = i * dPhi;
+        float phi2 = (i + 1) * dPhi;
+
+        // Loop interno (Longitude)
+        for (unsigned int j = 0; j < pTheta; ++j) {
+            float theta1 = j * dTheta;
+            float theta2 = (j + 1) * dTheta;
+
+            // Para cada passo do loop, calculamos os 4 cantos de um quadrado da superfície
+            // V1: Topo-Esquerda
+            // V2: Baixo-Esquerda
+            // V3: Topo-Direita
+            // V4: Baixo-Direita
+
+            // Triângulo 1 (V1, V2, V3)
+            addVertice(malha->dados, &index, r, phi1, theta1); // V1
+            addVertice(malha->dados, &index, r, phi2, theta1); // V2
+            addVertice(malha->dados, &index, r, phi1, theta2); // V3
+
+            // Triângulo 2 (V3, V2, V4)
+            addVertice(malha->dados, &index, r, phi1, theta2); // V3
+            addVertice(malha->dados, &index, r, phi2, theta1); // V2
+            addVertice(malha->dados, &index, r, phi2, theta2); // V4
+        }
+    }
+    
+    return malha; // Retorna o array carregado
 }
 
 void initLighting() {
@@ -220,18 +248,22 @@ int main() {
         return -1;
     }
 
-    // 2. Criar a janela (Largura, Altura, Título, Monitor, Compartilhamento)
     GLFWwindow* window = glfwCreateWindow(800, 600, "Minha Primeira Janela GLFW em C", NULL, NULL);
     
-    // Verificar se a janela foi criada com sucesso
     if (!window) {
         fprintf(stderr, "Falha ao criar a janela GLFW\n");
         glfwTerminate();
         return -1;
     }
 
-    // 3. Tornar o contexto OpenGL da janela o contexto atual
     glfwMakeContextCurrent(window);
+
+    glewExperimental = GL_TRUE; 
+    if (glewInit() != GLEW_OK) {
+        fprintf(stderr, "Falha ao inicializar o GLEW\n");
+        return -1;
+    }
+
     glfwSetCursorPosCallback(window, mouseCallback);
     glfwSetScrollCallback(window, scrollCallback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -242,7 +274,29 @@ int main() {
     glLoadIdentity();
     gluPerspective(45.0f, 800.0f / 600.0f, 0.1f, 100.0f);
     
-    // 4. Loop Principal (Loop de Renderização)
+    EsferaMesh *terraMesh = criarEsferaArray(1.0f, 40, 40);
+    
+    // Guardamos o número de vértices pois vamos deletar a struct em seguida
+    int totalVertices = terraMesh->numVertices;
+
+    // --- PASSO 2: ENVIAR PARA A GPU (VRAM) ---
+    GLuint VBO;
+    glGenBuffers(1, &VBO); // Pede um "ID" de buffer para o OpenGL
+    glBindBuffer(GL_ARRAY_BUFFER, VBO); // Diz que este será o buffer ativo no momento
+    
+    // O tamanho do buffer é: número de vértices * 6 floats por vértice * tamanho do float
+    long tamanhoBytes = totalVertices * SPHERE_INFO * sizeof(float);
+    
+    // Copia os dados da RAM para a Placa de Vídeo
+    glBufferData(GL_ARRAY_BUFFER, tamanhoBytes, terraMesh->dados, GL_STATIC_DRAW);
+
+    carregarTexturaSol();
+    carregarTexturaTerra();
+    
+    free(terraMesh->dados);
+    free(terraMesh);
+
+    // Loop Principal
     while (!glfwWindowShouldClose(window) && running) {
 
         float currentFrame = glfwGetTime();
@@ -251,8 +305,8 @@ int main() {
 
         updateCamera(window);
 
-		glColor3f(1.0f, 0.0f, 0.0f);
-        criarEsfera(1.0f, 10, 10);
+        criarSol(currentFrame, VBO, totalVertices);
+        criarTerra(&camera, &cameraFront, VBO, currentFrame, totalVertices);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
