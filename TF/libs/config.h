@@ -1,14 +1,19 @@
-#ifndef _SOLAR_H
-#define _SOLAR_H
+#ifndef _CONFIG_H
+#define _CONFIG_H
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <GL/glu.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <math.h>
 #include "vector.h"
+#include "terra.h"
+#include "sol.h"
+#include "tela.h"
+#include "malha.h"
+
+#define STB_IMAGE_IMPLEMENTATION
 
 #define BUFFER_LEITURA_ARQUIVO 1024
 

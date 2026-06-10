@@ -1,5 +1,4 @@
-#include "solar.h"
-#include "sol.h"
+#include "libs/config.h"
 
 GLint shaderProgramSol = -1;
 GLint idTextura = -1;

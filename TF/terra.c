@@ -1,5 +1,4 @@
-#include "solar.h"
-#include "terra.h"
+#include "libs/config.h"
 
 GLint shaderTerraProgram = -1;
 GLint shaderNuvemProgram = -1;

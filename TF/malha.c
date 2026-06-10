@@ -1,4 +1,4 @@
-#include "malha.h"
+#include "libs/config.h"
 
 void addVertice(float* array, int* index, float r, float phi, float theta) {
     float x = r * sin(phi) * cos(theta);
@@ -13,8 +13,8 @@ void addVertice(float* array, int* index, float r, float phi, float theta) {
     array[(*index)++] = y / r;
     array[(*index)++] = z / r;
 
-    array[(*index)++] = 1.0f - theta / (2.0f * M_PI);
-    array[(*index)++] = 1.0f - phi / M_PI;
+    array[(*index)++] = 1.0f - theta / (2.0f * M_PI); // U
+    array[(*index)++] = 1.0f - phi / M_PI;            // V
 
     array[(*index)++] = -sin(theta);
     array[(*index)++] = 0.0f;

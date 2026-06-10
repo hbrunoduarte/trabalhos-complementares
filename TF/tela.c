@@ -1,12 +1,16 @@
-#include "solar.h"
+#include "libs/config.h"
 
-extern float lastX;
-extern float lastY;
-extern float yaw;
-extern float pitch;
-extern vector camera;
-extern vector cameraFront;
-extern booleano running;
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
+float lastX = 400.0, lastY = 300.0;
+booleano running = 1;
+
+// Posição do jogador no mundo (x, y, z)
+vector camera = {60.0f, 0.0f, 5.0f};
+vector cameraFront = {0.0f, 0.0f, 0.0f};
+
+float yaw = -90.0f; // esquerda/direita
+float pitch = 0.0f; // cima/baixo
 
 void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
     
@@ -35,7 +39,7 @@ void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
 
 }
 
-void scrollCallback(GLFWwindow* window, double xoffset, double yoffset){
+void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 
     float scrollSpeed = 0.5f;
 
@@ -79,4 +83,34 @@ void processarInput(GLFWwindow *window) {
         glfwWindowShouldClose(window);
         running = 0;
     }
+}
+
+GLFWwindow* configurarTela() {
+
+    if (!glfwInit()) {
+        fprintf(stderr, "Falha ao inicializar o GLFW\n");
+        exit(-1);
+    }
+
+    GLFWwindow* window = glfwCreateWindow(800, 600, "Minha Primeira Janela GLFW em C", NULL, NULL);
+    
+    if (!window) {
+        fprintf(stderr, "Falha ao criar a janela GLFW\n");
+        glfwTerminate();
+        exit(-1);
+    }
+
+    glfwMakeContextCurrent(window);
+
+    glewExperimental = GL_TRUE; 
+    if (glewInit() != GLEW_OK) {
+        fprintf(stderr, "Falha ao inicializar o GLEW\n");
+        exit(-1);
+    }
+
+    glfwSetCursorPosCallback(window, mouseCallback);
+    glfwSetScrollCallback(window, scrollCallback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    return window;
 }
