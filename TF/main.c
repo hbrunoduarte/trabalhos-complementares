@@ -72,9 +72,29 @@ int main() {
     // Copia os dados da RAM para a Placa de Vídeo
     glBufferData(GL_ARRAY_BUFFER, tamanhoBytes, terraMesh->dados, GL_STATIC_DRAW);
 
-    carregarTexturaSol();
-    carregarTexturaTerra();
+    CorpoCeleste terra;
+    terra.massa = 1.0f;
+    terra.posicao = (vector){60.0f, 0.0f, 0.0f};
+    terra.velocidade = (vector){0.0f, 0.0f, 15.0f};
+    terra.raioVisual = 0.5f;
+    terra.VBO = VBO;
+    terra.totalVertices = totalVertices;
+    terra.renderizar = renderizarTerra; // Aponta para a função em terra.c
+    terra.dadosVisuais = getDadosTerra();
+
+    CorpoCeleste sol;
+    sol.massa = 1000.0f;
+    sol.posicao = (vector){0.0f, 0.0f, 0.0f};
+    sol.velocidade = (vector){0.0f, 0.0f, 0.0f};
+    sol.raioVisual = 54.5f;
+    sol.VBO = VBO;
+    sol.totalVertices = totalVertices;
+    sol.renderizar = renderizarSol; // Aponta para a função em sol.c
+    sol.dadosVisuais = getDadosSol();
     
+    CorpoCeleste sistemaSolar[] = {sol, terra};
+    int numCorposCelestes = 2;
+
     free(terraMesh->dados);
     free(terraMesh);
 
@@ -86,12 +106,15 @@ int main() {
 
         updateCamera(window);
 
-        criarSol(currentFrame, VBO, totalVertices);
-        criarTerra(&camera, &cameraFront, VBO, currentFrame, totalVertices);
+        for (int i = 0; i < numCorposCelestes; i++)
+            sistemaSolar[i].renderizar(&sistemaSolar[i], &camera, &cameraFront, currentFrame);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+
+    for (int i = 0; i < numCorposCelestes; i++)
+        free(sistemaSolar[i].dadosVisuais);
 
     glfwTerminate();
     return 0;

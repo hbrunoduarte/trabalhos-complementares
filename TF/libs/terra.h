@@ -1,7 +1,16 @@
 #ifndef _TERRA_H
 #define _TERRA_H
 
-void carregarTexturaTerra();
-void criarTerra(const vector *camera, const vector *cameraFront, GLint VBO, float currentFrame, int totalVertices);
+typedef struct {
+    GLint shaderTerraProgram;
+    GLint shaderNuvemProgram;
+    GLint idTerraDia;
+    GLint idTerraNoite;
+    GLint idNuvens;
+    GLint idNormal;
+} DadosTerra;
+
+DadosTerra* getDadosTerra();
+void renderizarTerra(CorpoCeleste *terra, const vector *camera, const vector *cameraFront, float currentFrame);
 
 #endif
