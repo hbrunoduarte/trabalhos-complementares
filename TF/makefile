@@ -1,7 +1,7 @@
 # Variáveis de compilação
 CC = gcc
 CFLAGS = -Wall
-LIBS = -lGLEW -lglfw -lGL -lGLU -lm
+LIBS = -lGLEW -lglfw -lGL -lGLU -lcglm -lm
 
 # Encontra magicamente TODOS os arquivos .c no diretório atual
 SRCS = $(wildcard *.c)

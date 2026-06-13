@@ -4,13 +4,29 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 float lastX = 400.0, lastY = 300.0;
 booleano running = 1;
+booleano pause = 0;
 
 // Posição do jogador no mundo (x, y, z)
-vector camera = {60.0f, 0.0f, 5.0f};
+vector camera = {60.0f, 15.0f, 5.0f};
 vector cameraFront = {0.0f, 0.0f, 0.0f};
 
 float yaw = -90.0f; // esquerda/direita
 float pitch = 0.0f; // cima/baixo
+
+mat4 globalViewMatrix;
+mat4 globalProjectionMatrix;
+
+void updateCamera(GLFWwindow *window) {
+
+    processarInput(window);
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    vector alvoVec = addVectors(camera, cameraFront);
+    vec3 camUp = {0.0f, 1.0f, 0.0f};
+    
+    glm_lookat(camera.raw, alvoVec.raw, camUp, globalViewMatrix);
+}
 
 void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
     
@@ -68,7 +84,7 @@ void processarInput(GLFWwindow *window) {
     cameraFront.y = sin(pitchRad);
     cameraFront.z = sin(yawRad) * cos(pitchRad);
 
-    float velCaminhada = 0.05f;
+    float velCaminhada = 1.0f;
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
         camera = addVectors(camera, mulVector(cameraFront, velCaminhada));
@@ -76,6 +92,14 @@ void processarInput(GLFWwindow *window) {
 
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
         camera = addVectors(camera, mulVector(cameraFront, -velCaminhada));
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
+        pause = 1;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
+        pause = 0;
     }
 
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
@@ -93,11 +117,7 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
 
     float proporcaoAtual = (float)width / (float)height;
 
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(45.0f, proporcaoAtual, 0.1f, 200.0f);
-
-    glMatrixMode(GL_MODELVIEW);
+    glm_perspective(glm_rad(45.0f), proporcaoAtual, 0.1f, 300.0f, globalProjectionMatrix);
 }
 
 GLFWwindow* configurarTela() {

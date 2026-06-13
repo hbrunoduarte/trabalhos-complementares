@@ -1,4 +1,4 @@
-#include "libs/vector.h"
+#include "libs/config.h"
 
 vector addVectors(const vector u, const vector v) {
     vector sum;

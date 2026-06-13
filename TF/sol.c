@@ -1,5 +1,8 @@
 #include "libs/config.h"
 
+extern mat4 globalProjectionMatrix;
+extern mat4 globalViewMatrix;
+
 void compilarShaderSol(DadosSol *dados) {
     char *vertexShaderSource = lerArquivo("shaders/sol/solVertexShader.vs");
     char *fragmentShaderSource = lerArquivo("shaders/sol/solFragShader.vs");
@@ -24,48 +27,49 @@ DadosSol* getDadosSol() {
 void renderizarSol(CorpoCeleste *sol, vector *camera, vector *cameraFront, float currentFrame) {
     
     DadosSol *dados = (DadosSol*) sol->dadosVisuais;
+    float raioVisual = calcularRaioVisual(sol);
 
     glActiveTexture(GL_TEXTURE0); 
     glBindTexture(GL_TEXTURE_2D, dados->idTextura); 
 
-    glPushMatrix();
-        glScalef(sol->raioVisual, sol->raioVisual, sol->raioVisual); 
+    // Ativa o Shader do Sol
+    glUseProgram(dados->shaderProgramSol);
 
-        // Ativa o Shader do Sol
-        glUseProgram(dados->shaderProgramSol);
+    // calcula as transformações sobre o modelo
+    mat4 modelMatrix;
+    glm_mat4_identity(modelMatrix);
+    glm_mat4_scale(modelMatrix, raioVisual);
 
-        // Captura as matrizes matemáticas
-        float modelViewSol[16];
-        float projectionSol[16];
-        glGetFloatv(GL_MODELVIEW_MATRIX, modelViewSol);
-        glGetFloatv(GL_PROJECTION_MATRIX, projectionSol);
+    // coloca o modelo em relação à câmera
+    mat4 modelViewSol;
+    glm_mat4_mul(globalViewMatrix, modelMatrix, modelViewSol);
 
-        // Envia as matrizes para o Shader
-        glUniformMatrix4fv(glGetUniformLocation(dados->shaderProgramSol, "modelView"), 1, GL_FALSE, modelViewSol);
-        glUniformMatrix4fv(glGetUniformLocation(dados->shaderProgramSol, "projection"), 1, GL_FALSE, projectionSol);
 
-        // Envia o TEMPO para animar o plasma
-        // Usamos currentFrame que você já calcula no seu loop (glfwGetTime())
-        glUniform1f(glGetUniformLocation(dados->shaderProgramSol, "tempo"), currentFrame);
+    // Envia as matrizes para o Shader
+    glUniformMatrix4fv(glGetUniformLocation(dados->shaderProgramSol, "modelView"), 1, GL_FALSE, modelViewSol);
+    glUniformMatrix4fv(glGetUniformLocation(dados->shaderProgramSol, "projection"), 1, GL_FALSE, globalProjectionMatrix);
 
-        // Ativa a gaveta da textura do Sol
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, dados->idTextura);
-        glUniform1i(glGetUniformLocation(dados->shaderProgramSol, "texSol"), 0);
+    // Envia o TEMPO para animar o plasma
+    // Usamos currentFrame que você já calcula no seu loop (glfwGetTime())
+    glUniform1f(glGetUniformLocation(dados->shaderProgramSol, "tempo"), currentFrame);
 
-        // Diz ao VBO como ler os dados (Posição = 0, UV = 2)
-        glBindBuffer(GL_ARRAY_BUFFER, sol->VBO);
-        glEnableVertexAttribArray(0); // Posição
-        glEnableVertexAttribArray(2); // Textura UV
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, SPHERE_INFO * sizeof(float), (void*)0);
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, SPHERE_INFO * sizeof(float), (void*)(6 * sizeof(float)));
+    // Ativa a gaveta da textura do Sol
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, dados->idTextura);
+    glUniform1i(glGetUniformLocation(dados->shaderProgramSol, "texSol"), 0);
 
-        // Bate o carimbo da esfera!
-        glDrawArrays(GL_TRIANGLES, 0, sol->totalVertices);
+    // Diz ao VBO como ler os dados (Posição = 0, UV = 2)
+    glBindBuffer(GL_ARRAY_BUFFER, sol->VBO);
+    glEnableVertexAttribArray(0); // Posição
+    glEnableVertexAttribArray(2); // Textura UV
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, SPHERE_INFO * sizeof(float), (void*)0);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, SPHERE_INFO * sizeof(float), (void*)(6 * sizeof(float)));
 
-        // Desliga tudo para limpar o estado
-        glDisableVertexAttribArray(0);
-        glDisableVertexAttribArray(2);
-        glUseProgram(0);
-    glPopMatrix();
+    // Bate o carimbo da esfera!
+    glDrawArrays(GL_TRIANGLES, 0, sol->totalVertices);
+
+    // Desliga tudo para limpar o estado
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(2);
+    glUseProgram(0);
 }

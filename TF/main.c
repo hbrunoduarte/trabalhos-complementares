@@ -11,24 +11,9 @@ extern vector cameraFront;
 extern float deltaTime;
 extern float lastFrame;
 extern booleano running;
+extern booleano pause;
 
-void updateCamera(GLFWwindow *window) {
-
-    processarInput(window);
-
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
-    vector alvo = addVectors(camera, cameraFront);
-
-    gluLookAt(
-        camera.x, camera.y, camera.z,
-        alvo.x, alvo.y, alvo.z,
-        0.0f, 1.0f, 0.0f
-    );
-}
+extern mat4 globalViewMatrix;
 
 void initLighting() {
     glEnable(GL_DEPTH_TEST);
@@ -72,31 +57,34 @@ int main() {
     // Copia os dados da RAM para a Placa de Vídeo
     glBufferData(GL_ARRAY_BUFFER, tamanhoBytes, terraMesh->dados, GL_STATIC_DRAW);
 
-    CorpoCeleste terra;
-    terra.massa = 1.0f;
-    terra.posicao = (vector){60.0f, 0.0f, 0.0f};
-    terra.velocidade = (vector){0.0f, 0.0f, 15.0f};
-    terra.raioVisual = 0.5f;
-    terra.VBO = VBO;
-    terra.totalVertices = totalVertices;
-    terra.renderizar = renderizarTerra; // Aponta para a função em terra.c
-    terra.dadosVisuais = getDadosTerra();
-
-    CorpoCeleste sol;
-    sol.massa = 1000.0f;
-    sol.posicao = (vector){0.0f, 0.0f, 0.0f};
-    sol.velocidade = (vector){0.0f, 0.0f, 0.0f};
-    sol.raioVisual = 54.5f;
-    sol.VBO = VBO;
-    sol.totalVertices = totalVertices;
-    sol.renderizar = renderizarSol; // Aponta para a função em sol.c
-    sol.dadosVisuais = getDadosSol();
-    
-    CorpoCeleste sistemaSolar[] = {sol, terra};
-    int numCorposCelestes = 2;
-
     free(terraMesh->dados);
     free(terraMesh);
+
+    CorpoCeleste sol = criarCorpoCeleste(1.9891e30, 1408.0f, VETOR_NULO,
+                                         0.0f, 0.0f, 14.71*DEG2RAD,
+                                         renderizarSol, getDadosSol(), NULL);
+    
+    CorpoCeleste terra = criarCorpoCeleste(5.9722e24, 5515.0f, VETOR_NULO,
+                                           150e6, 2e-3f, 7.27e-2f,
+                                           renderizarTerra, getDadosTerra(), &sol);
+
+    CorpoCeleste terra2 = criarCorpoCeleste(7.346e22, 3344.0f, VETOR_NULO,
+                                            3844000.0f, 0.22f, 7.27e-5f,
+                                            renderizarTerra, getDadosTerra(), &terra);
+    
+    int numCorposCelestes = 3;
+    CorpoCeleste *sistemaSolar = malloc(sizeof(CorpoCeleste) * numCorposCelestes);
+    sistemaSolar[0] = sol;
+    sistemaSolar[1] = terra;
+    sistemaSolar[2] = terra2;
+
+    sistemaSolar[1].orbita = &sistemaSolar[0]; // A Terra orbita o Sol do array
+    sistemaSolar[2].orbita = &sistemaSolar[1];
+
+    for (int i = 0; i < numCorposCelestes; i++) {
+        sistemaSolar[i].VBO = VBO;
+        sistemaSolar[i].totalVertices = totalVertices;
+    }
 
     while (!glfwWindowShouldClose(window) && running) {
 
@@ -105,6 +93,12 @@ int main() {
         lastFrame = currentFrame;
 
         updateCamera(window);
+
+        if (!pause) {
+            for (int i = 1; i < numCorposCelestes; i++) { // Ignora o Sol (0) para mantê-lo fixo no centro
+                atualizarFisica(&sistemaSolar[i], 10*deltaTime);
+            }
+        }
 
         for (int i = 0; i < numCorposCelestes; i++)
             sistemaSolar[i].renderizar(&sistemaSolar[i], &camera, &cameraFront, currentFrame);
@@ -115,6 +109,7 @@ int main() {
 
     for (int i = 0; i < numCorposCelestes; i++)
         free(sistemaSolar[i].dadosVisuais);
+    free(sistemaSolar);
 
     glfwTerminate();
     return 0;
