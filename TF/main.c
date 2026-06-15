@@ -4,6 +4,9 @@ extern float lastX;
 extern float lastY;
 extern float yaw;
 extern float pitch;
+extern int width;
+extern int height;
+extern float speedTime;
 
 extern vector camera;
 extern vector cameraFront;
@@ -15,46 +18,25 @@ extern booleano pause;
 
 extern mat4 globalViewMatrix;
 
-void initLighting() {
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
-
-    GLfloat luzAmbiente[] = { 0.2f, 0.2f, 0.2f, 1.0f }; 
-    GLfloat luzDifusa[]   = { 0.8f, 0.8f, 0.8f, 1.0f }; 
-    GLfloat luzPosicao[]  = { 0.0f, 0.0f, 0.0f, 0.0f }; 
-
-    glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, luzDifusa);
-    glLightfv(GL_LIGHT0, GL_POSITION, luzPosicao);
-
-    glEnable(GL_COLOR_MATERIAL);
-    glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-    glShadeModel(GL_SMOOTH);
-}
-
 int main() {
     
     GLFWwindow *window = configurarTela();
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LIGHTING);
-
-    int width, height;
+    
     glfwGetFramebufferSize(window, &width, &height);
     framebufferSizeCallback(window, width, height);
     
     EsferaMesh *terraMesh = criarEsferaArray(1.0f, 60, 60);
     int totalVertices = terraMesh->numVertices;
 
-    // --- PASSO 2: ENVIAR PARA A GPU (VRAM) ---
     GLuint VBO;
-    glGenBuffers(1, &VBO); // Pede um "ID" de buffer para o OpenGL
-    glBindBuffer(GL_ARRAY_BUFFER, VBO); // Diz que este será o buffer ativo no momento
-    
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
     long tamanhoBytes = totalVertices * SPHERE_INFO * sizeof(float);
     
-    // Copia os dados da RAM para a Placa de Vídeo
     glBufferData(GL_ARRAY_BUFFER, tamanhoBytes, terraMesh->dados, GL_STATIC_DRAW);
 
     free(terraMesh->dados);
@@ -86,6 +68,9 @@ int main() {
         sistemaSolar[i].totalVertices = totalVertices;
     }
 
+    carregarShaderSombras();
+    setFramebufferSombras(sistemaSolar+1, numCorposCelestes-1);
+
     while (!glfwWindowShouldClose(window) && running) {
 
         float currentFrame = glfwGetTime();
@@ -96,9 +81,11 @@ int main() {
 
         if (!pause) {
             for (int i = 1; i < numCorposCelestes; i++) { // Ignora o Sol (0) para mantê-lo fixo no centro
-                atualizarFisica(&sistemaSolar[i], 10*deltaTime);
+                atualizarFisica(&sistemaSolar[i], speedTime * deltaTime);
             }
         }
+
+        calcularSombras(window, sistemaSolar+1, numCorposCelestes-1);
 
         for (int i = 0; i < numCorposCelestes; i++)
             sistemaSolar[i].renderizar(&sistemaSolar[i], &camera, &cameraFront, currentFrame);

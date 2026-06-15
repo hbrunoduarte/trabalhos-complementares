@@ -3,8 +3,12 @@
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 float lastX = 400.0, lastY = 300.0;
+int width;
+int height;
 booleano running = 1;
 booleano pause = 0;
+
+float speedTime = 1.0;
 
 // Posição do jogador no mundo (x, y, z)
 vector camera = {60.0f, 15.0f, 5.0f};
@@ -63,6 +67,16 @@ void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
         camera = addVectors(camera, mulVector(cameraFront, scrollSpeed));
     } else if (yoffset<0) {
         camera = addVectors(camera, mulVector(cameraFront, -scrollSpeed));
+    }
+}
+
+void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+        speedTime *= speedTime >= MAX_TIMESPEED ? 1 : 2;
+    }
+    
+    if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE) {
+        speedTime /= speedTime <= MIN_TIMESPEED ? 1 : 2;
     }
 }
 
@@ -146,6 +160,7 @@ GLFWwindow* configurarTela() {
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
     glfwSetCursorPosCallback(window, mouseCallback);
     glfwSetScrollCallback(window, scrollCallback);
+    glfwSetMouseButtonCallback(window, mouseButtonCallback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     return window;

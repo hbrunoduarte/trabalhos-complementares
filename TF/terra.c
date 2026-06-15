@@ -4,25 +4,29 @@ extern mat4 globalProjectionMatrix;
 extern mat4 globalViewMatrix;
 
 void compilarShaderTerra(DadosTerra *dados) {
-    
+
+    char *lib = lerArquivo(SHADER_LIB_CAMINHO);
     char *vertexShaderSource = lerArquivo("shaders/terra/terraVertexShader.vs");
     char *fragmentShaderSource = lerArquivo("shaders/terra/terraFragShader.vs");
 
-    dados->shaderTerraProgram = carregarShader(vertexShaderSource, fragmentShaderSource);
+    dados->shaderTerraProgram = carregarShader(vertexShaderSource, fragmentShaderSource, lib);
 
     free(vertexShaderSource);
     free(fragmentShaderSource);
+    free(lib);
 }
 
 void compilarShaderNuvens(DadosTerra *dados) {
 
+    char *lib = lerArquivo(SHADER_LIB_CAMINHO);
     char *vertexShaderSource = lerArquivo("shaders/terra/nuvemVertexShader.vs");
     char *fragmentShaderSource = lerArquivo("shaders/terra/nuvemFragShader.vs");
 
-    dados->shaderNuvemProgram = carregarShader(vertexShaderSource, fragmentShaderSource);
+    dados->shaderNuvemProgram = carregarShader(vertexShaderSource, fragmentShaderSource, lib);
 
     free(vertexShaderSource);
     free(fragmentShaderSource);
+    free(lib);
 }
 
 void carregarTexturaTerra(DadosTerra *dados) {
@@ -48,12 +52,6 @@ void renderizarTerra(CorpoCeleste *terra, const vector *camera, const vector *ca
 
     glUseProgram(dados->shaderTerraProgram);
 
-    // 1. CÁLCULO DA MATRIZ VIEW (CÂMARA)
-    mat4 viewMatrix;
-    vector alvoVec = addVectors(*camera, *cameraFront);
-    vec3 camUp = {0.0f, 1.0f, 0.0f};
-    glm_lookat(camera->raw, alvoVec.raw, camUp, viewMatrix);
-
     // 2. CÁLCULO DA MATRIZ MODEL (TRANSFORMAÇÕES DO PLANETA)
     mat4 modelMatrix;
     glm_mat4_identity(modelMatrix); // Começa com uma matriz limpa
@@ -63,19 +61,21 @@ void renderizarTerra(CorpoCeleste *terra, const vector *camera, const vector *ca
 
     // 3. COMBINAR VIEW E MODEL (Para o seu Shader que espera a matriz ModelView)
     mat4 modelViewMatrix;
-    glm_mat4_mul(viewMatrix, modelMatrix, modelViewMatrix);
+    glm_mat4_mul(globalViewMatrix, modelMatrix, modelViewMatrix);
 
     // 5. ENVIAR MATRIZES PARA O SHADER
     // A cglm já formata a matriz no padrão coluna-maior do OpenGL (GL_FALSE)
     glUniformMatrix4fv(glGetUniformLocation(dados->shaderTerraProgram, "modelView"), 1, GL_FALSE, (float*)modelViewMatrix);
     glUniformMatrix4fv(glGetUniformLocation(dados->shaderTerraProgram, "projection"), 1, GL_FALSE, globalProjectionMatrix);
+    glUniformMatrix4fv(glGetUniformLocation(dados->shaderTerraProgram, "model"), 1, GL_FALSE, (float*)modelMatrix);
+    glUniformMatrix4fv(glGetUniformLocation(dados->shaderTerraProgram, "lightSpaceMatrix"), 1, GL_FALSE, (float*)terra->lightSpaceMatrix);
 
     // 6. CALCULAR A POSIÇÃO DO SOL (Luz) NA VISÃO DA CÂMARA
     // O Sol está na origem do mundo (0, 0, 0). 
     // Multiplicar (0,0,0,1) pela Matriz View transporta essa coordenada para a perspetiva da câmara!
     vec4 posSolMundo = {0.0f, 0.0f, 0.0f, 1.0f};
     vec4 lightPosView;
-    glm_mat4_mulv(viewMatrix, posSolMundo, lightPosView);
+    glm_mat4_mulv(globalViewMatrix, posSolMundo, lightPosView);
     glUniform3f(glGetUniformLocation(dados->shaderTerraProgram, "lightPosView"), lightPosView[0], lightPosView[1], lightPosView[2]);
 
     glActiveTexture(GL_TEXTURE0);
@@ -93,6 +93,10 @@ void renderizarTerra(CorpoCeleste *terra, const vector *camera, const vector *ca
     glActiveTexture(GL_TEXTURE3);
     glBindTexture(GL_TEXTURE_2D, dados->idNormal);
     glUniform1i(glGetUniformLocation(dados->shaderTerraProgram, "texNormal"), 3);
+
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, terra->depthMap);
+    glUniform1i(glGetUniformLocation(dados->shaderTerraProgram, "shadowMap"), 4);
 
     glBindBuffer(GL_ARRAY_BUFFER, terra->VBO);
 
@@ -127,10 +131,12 @@ void renderizarTerra(CorpoCeleste *terra, const vector *camera, const vector *ca
     glm_rotate(modelMatrix, currentFrame * -0.5f, (vec3){0.0f, 1.0f, 0.0f});
     glm_scale(modelMatrix, (vec3){raioVisual * 1.01f, raioVisual * 1.01f, raioVisual * 1.01f}); // Ligeiramente maior que a Terra
 
-    glm_mat4_mul(viewMatrix, modelMatrix, modelViewMatrix);
+    glm_mat4_mul(globalViewMatrix, modelMatrix, modelViewMatrix);
 
     glUniformMatrix4fv(glGetUniformLocation(dados->shaderNuvemProgram, "modelView"), 1, GL_FALSE, modelViewMatrix);
     glUniformMatrix4fv(glGetUniformLocation(dados->shaderNuvemProgram, "projection"), 1, GL_FALSE, globalProjectionMatrix);
+    glUniformMatrix4fv(glGetUniformLocation(dados->shaderNuvemProgram, "model"), 1, GL_FALSE, (float*)modelMatrix);
+    glUniformMatrix4fv(glGetUniformLocation(dados->shaderNuvemProgram, "lightSpaceMatrix"), 1, GL_FALSE, (float*)terra->lightSpaceMatrix);
 
     // --- CORREÇÃO 1: Enviando o 'tempo' para animar as UVs ---
     glUniform1f(glGetUniformLocation(dados->shaderNuvemProgram, "tempo"), currentFrame);
@@ -143,6 +149,10 @@ void renderizarTerra(CorpoCeleste *terra, const vector *camera, const vector *ca
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, dados->idNuvens);
     glUniform1i(glGetUniformLocation(dados->shaderNuvemProgram, "texNuvens"), 0);
+
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, terra->depthMap);
+    glUniform1i(glGetUniformLocation(dados->shaderNuvemProgram, "shadowMap"), 4);
     
     // Desenhando o VBO
     glBindBuffer(GL_ARRAY_BUFFER, terra->VBO);

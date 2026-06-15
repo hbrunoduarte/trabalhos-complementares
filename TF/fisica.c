@@ -100,4 +100,3 @@ vector calcularPosicaoVisual(CorpoCeleste *corpo) {
 
     return addVectors(posicaoMundoOrbitado, posicaoVisualRelativa);
 }
-

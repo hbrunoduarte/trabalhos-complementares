@@ -7,7 +7,7 @@ void compilarShaderSol(DadosSol *dados) {
     char *vertexShaderSource = lerArquivo("shaders/sol/solVertexShader.vs");
     char *fragmentShaderSource = lerArquivo("shaders/sol/solFragShader.vs");
 
-    dados->shaderProgramSol = carregarShader(vertexShaderSource, fragmentShaderSource);
+    dados->shaderProgramSol = carregarShader(vertexShaderSource, fragmentShaderSource, NULL);
 
     free(vertexShaderSource);
     free(fragmentShaderSource);
@@ -38,7 +38,7 @@ void renderizarSol(CorpoCeleste *sol, vector *camera, vector *cameraFront, float
     // calcula as transformações sobre o modelo
     mat4 modelMatrix;
     glm_mat4_identity(modelMatrix);
-    glm_mat4_scale(modelMatrix, raioVisual);
+    glm_scale(modelMatrix, (vec3){raioVisual, raioVisual, raioVisual});
 
     // coloca o modelo em relação à câmera
     mat4 modelViewSol;

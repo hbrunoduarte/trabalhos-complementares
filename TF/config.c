@@ -27,19 +27,81 @@ char* lerArquivo(const char *caminho) {
     return conteudo;
 }
 
-GLuint carregarShader(const char *vertexShaderSource, const char *fragShaderSource) {
+/*GLuint carregarShader(const char *vertexShaderSource, const char *fragShaderSource, const char *libSource) {
+
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+    const char* vertexStrings[2] = { "#version 330 core\n", vertexShaderSource };
+    glShaderSource(vertexShader, 2, vertexStrings, NULL);
     glCompileShader(vertexShader);
 
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragShaderSource, NULL);
+    const char* fragStrings[3];
+    fragStrings[0] = "#version 330 core\n";
+    fragStrings[1] = libSource ? libSource : ""; // Se não houver biblioteca, envia vazio
+    fragStrings[2] = fragShaderSource;
+    
+    glShaderSource(fragmentShader, 3, fragStrings, NULL);
     glCompileShader(fragmentShader);
 
+    // --- LINKAGEM ---
     GLuint shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
     glAttachShader(shaderProgram, fragmentShader);
     glLinkProgram(shaderProgram);
+
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+    return shaderProgram;
+}*/
+
+GLuint carregarShader(const char *vertexShaderSource, const char *fragShaderSource, const char *libSource) {
+    
+    int success;
+    char infoLog[512];
+
+    // --- VERTEX SHADER ---
+    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    const char* vertexStrings[2] = { "#version 330 core\n", vertexShaderSource };
+    glShaderSource(vertexShader, 2, vertexStrings, NULL);
+    glCompileShader(vertexShader);
+    
+    // VERIFICA ERROS NO VERTEX
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+        printf("ERRO FATAL NO VERTEX SHADER:\n%s\n", infoLog);
+    }
+
+    // --- FRAGMENT SHADER ---
+    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    const char* fragStrings[3];
+    fragStrings[0] = "#version 330 core\n";
+    fragStrings[1] = libSource ? libSource : ""; 
+    fragStrings[2] = fragShaderSource;
+    
+    glShaderSource(fragmentShader, 3, fragStrings, NULL);
+    glCompileShader(fragmentShader);
+
+    // VERIFICA ERROS NO FRAGMENT
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+        printf("ERRO FATAL NO FRAGMENT SHADER:\n%s\n", infoLog);
+    }
+
+    // --- LINKAGEM DO PROGRAMA ---
+    GLuint shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
+
+    // VERIFICA ERROS NA LINKAGEM
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+        printf("ERRO FATAL NA LINKAGEM DO SHADER:\n%s\n", infoLog);
+    }
 
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);

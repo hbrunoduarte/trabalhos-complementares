@@ -43,10 +43,16 @@ typedef struct corpo_celeste {
     struct corpo_celeste *orbita;
     void* dadosVisuais; // Ponteiro genérico para guardar as texturas e shaders específicos
 
+    // Renderização e física
+    GLuint depthMapFBO;      // O Framebuffer deste planeta
+    GLuint depthMap;         // A textura da sombra gerada para este planeta
+    mat4 lightSpaceMatrix;
+
 } CorpoCeleste;
 
 typedef void(*funcaoRenderizacao)(struct corpo_celeste* self, const vector* camera, const vector* cameraFront, float currentFrame);
 
+#include "sombra.h"
 #include "fisica.h"
 #include "terra.h"
 #include "sol.h"
@@ -54,7 +60,7 @@ typedef void(*funcaoRenderizacao)(struct corpo_celeste* self, const vector* came
 #include "malha.h"
 
 char* lerArquivo(const char *caminho);
-GLuint carregarShader(const char *vertexShaderSource, const char *fragShaderSource);
+GLuint carregarShader(const char *vertexShaderSource, const char *fragShaderSource, const char *libSource);
 GLuint carregarTextura(const char* caminho);
 
 #endif

@@ -1,19 +1,22 @@
-#version 330 core
 in vec3 FragPos;
 in vec3 Normal;
 in vec2 TexCoord;
+in vec4 FragPosLightSpace;
 out vec4 FragColor;
 
 uniform sampler2D texNuvens;
 uniform vec3 lightPosView;
-uniform float tempo; // NOVO: O relógio do jogo
+uniform float tempo; // O relógio do jogo
 
 void main() {
    vec3 norm = normalize(Normal);
    vec3 lightDir = normalize(lightPosView - FragPos);
-   float impactoLuz = max(dot(norm, lightDir), 0.0);
+
+   float luzDaRotacao = dot(norm, lightDir);
+   float valorSombra = calcularSombra(FragPosLightSpace, norm, lightDir);
    
-   // NOVO: Desliza a textura suavemente para o lado
+   float impactoLuz = luzDaRotacao > 0.0 ? luzDaRotacao * (1.0 - valorSombra) : luzDaRotacao;  
+   // Desliza a textura suavemente para o lado
    vec2 uvAnimada = TexCoord + vec2(tempo * 0.02, 0.0);
    
    // Lê a textura usando o UV animado!
