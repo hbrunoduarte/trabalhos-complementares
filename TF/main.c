@@ -41,27 +41,36 @@ int main() {
 
     free(terraMesh->dados);
     free(terraMesh);
-
-    CorpoCeleste sol = criarCorpoCeleste(1.9891e30, 1408.0f, VETOR_NULO,
+    
+    int numCorposCelestes = 8;
+    CorpoCeleste *sistemaSolar = malloc(sizeof(CorpoCeleste) * numCorposCelestes);
+    sistemaSolar[SOL] = criarCorpoCeleste(1.9891e30, 1408.0f, VETOR_NULO,
                                          0.0f, 0.0f, 14.71*DEG2RAD,
                                          renderizarSol, getDadosSol(), NULL);
+
+    // sistemaSolar[MERCURIO] =
     
-    CorpoCeleste terra = criarCorpoCeleste(5.9722e24, 5515.0f, VETOR_NULO,
+    // sistemaSolar[VENUS] =
+
+    sistemaSolar[TERRA] = criarCorpoCeleste(5.9722e24, 5515.0f, VETOR_NULO,
                                            150e6, 2e-3f, 7.27e-2f,
-                                           renderizarTerra, getDadosTerra(), &sol);
+                                           renderizarTerra, getDadosTerra(), &sistemaSolar[SOL]);
 
-    CorpoCeleste terra2 = criarCorpoCeleste(7.346e22, 3344.0f, VETOR_NULO,
+    // sistemaSolar[MARTE] =
+
+    // sistemaSolar[JUPITER] =
+
+    // sistemaSolar[SATURNO] =
+
+    // sistemaSolar[URANO] =
+
+    // sistemaSolar[NETUNO] =
+
+    sistemaSolar[LUA] = criarCorpoCeleste(7.346e22, 3344.0f, VETOR_NULO,
                                             3844000.0f, 0.22f, 7.27e-5f,
-                                            renderizarTerra, getDadosTerra(), &terra);
-    
-    int numCorposCelestes = 3;
-    CorpoCeleste *sistemaSolar = malloc(sizeof(CorpoCeleste) * numCorposCelestes);
-    sistemaSolar[0] = sol;
-    sistemaSolar[1] = terra;
-    sistemaSolar[2] = terra2;
+                                            renderizarPlaneta, getDadosPlaneta("imagens/lua/lua.jpg"), 
+                                            &sistemaSolar[TERRA]);
 
-    sistemaSolar[1].orbita = &sistemaSolar[0]; // A Terra orbita o Sol do array
-    sistemaSolar[2].orbita = &sistemaSolar[1];
 
     for (int i = 0; i < numCorposCelestes; i++) {
         sistemaSolar[i].VBO = VBO;
