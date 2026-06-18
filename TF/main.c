@@ -42,7 +42,7 @@ int main() {
     free(terraMesh->dados);
     free(terraMesh);
     
-    int numCorposCelestes = 8;
+    int numCorposCelestes = 9;
     CorpoCeleste *sistemaSolar = malloc(sizeof(CorpoCeleste) * numCorposCelestes);
 
     sistemaSolar[SOL] = criarCorpoCeleste(1.9891e30, 1408.0f, VETOR_NULO,
@@ -54,7 +54,9 @@ int main() {
                                               renderizarPlaneta, getDadosPlaneta("imagens/mercurio/mercurio.jpg"), 
                                               &sistemaSolar[SOL]);
     
-    // sistemaSolar[VENUS] = x
+    sistemaSolar[VENUS] = criarCorpoCeleste(4.8675e24, 5243.0f, VETOR_NULO,
+                                           108.2e6, 1.0e-3f, 2.8e-2f,
+                                           renderizarVenus, getDadosVenus(), &sistemaSolar[SOL]);
 
     sistemaSolar[TERRA] = criarCorpoCeleste(5.9722e24, 5515.0f, VETOR_NULO,
                                            150e6, 2e-3f, 7.27e-2f,
