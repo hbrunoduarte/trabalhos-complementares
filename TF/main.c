@@ -44,27 +44,43 @@ int main() {
     
     int numCorposCelestes = 8;
     CorpoCeleste *sistemaSolar = malloc(sizeof(CorpoCeleste) * numCorposCelestes);
+
     sistemaSolar[SOL] = criarCorpoCeleste(1.9891e30, 1408.0f, VETOR_NULO,
                                          0.0f, 0.0f, 14.71*DEG2RAD,
                                          renderizarSol, getDadosSol(), NULL);
 
-    // sistemaSolar[MERCURIO] =
+    sistemaSolar[MERCURIO] = criarCorpoCeleste(3.3011e23, 2439.7f, VETOR_NULO,
+                                              57.9e6, 4.7e-3f, 1.08e-2f,
+                                              renderizarPlaneta, getDadosPlaneta("imagens/mercurio/mercurio.jpg"), 
+                                              &sistemaSolar[SOL]);
     
-    // sistemaSolar[VENUS] =
+    // sistemaSolar[VENUS] = x
 
     sistemaSolar[TERRA] = criarCorpoCeleste(5.9722e24, 5515.0f, VETOR_NULO,
                                            150e6, 2e-3f, 7.27e-2f,
                                            renderizarTerra, getDadosTerra(), &sistemaSolar[SOL]);
 
-    // sistemaSolar[MARTE] =
+    sistemaSolar[MARTE] = criarCorpoCeleste(6.4171e23, 3389.5f, VETOR_NULO,
+                                           227.9e6, 1.5e-3f, 7.0e-2f, 
+                                           renderizarPlaneta, getDadosPlaneta("imagens/marte/marte.jpg"),
+                                           &sistemaSolar[SOL]);
 
-    // sistemaSolar[JUPITER] =
+    sistemaSolar[JUPITER] = criarCorpoCeleste(1.8982e27, 1326.0f, VETOR_NULO,
+                                             778.5e6, 1.7e-4f, 1.7e-1f,
+                                             renderizarPlaneta, getDadosPlaneta("imagens/jupiter/jupiter.jpg"), 
+                                             &sistemaSolar[SOL]);
 
-    // sistemaSolar[SATURNO] =
+    // sistemaSolar[SATURNO] = x
 
-    // sistemaSolar[URANO] =
+    sistemaSolar[URANO] = criarCorpoCeleste(8.6810e25, 1270.0f, VETOR_NULO,
+                                           2871e6, 2.4e-5f, 9.7e-2f,
+                                           renderizarPlaneta, getDadosPlaneta("imagens/urano/urano.jpg"), 
+                                           &sistemaSolar[SOL]);
 
-    // sistemaSolar[NETUNO] =
+    sistemaSolar[NETUNO] = criarCorpoCeleste(1.0241e26, 1638.0f, VETOR_NULO,
+                                            4495e6, 1.2e-5f, 1.1e-1f,
+                                            renderizarPlaneta, getDadosPlaneta("imagens/netuno/netuno.jpg"), 
+                                            &sistemaSolar[SOL]);
 
     sistemaSolar[LUA] = criarCorpoCeleste(7.346e22, 3344.0f, VETOR_NULO,
                                             3844000.0f, 0.22f, 7.27e-5f,
