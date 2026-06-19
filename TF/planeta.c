@@ -8,7 +8,6 @@ void compilarShaderPlaneta(DadosPlaneta *dados) {
     char *vertexShaderSource = lerArquivo("shaders/planeta/planetaVertexShader.vs");
     char *fragmentShaderSource = lerArquivo("shaders/planeta/planetaFragShader.vs");
 
-    // Como o fragment shader não usa funções da biblioteca de sombras, passamos NULL
     dados->shaderProgramPlaneta = carregarShader(vertexShaderSource, fragmentShaderSource, NULL);
 
     free(vertexShaderSource);
@@ -45,7 +44,7 @@ void renderizarPlaneta(CorpoCeleste *planeta, const vector *camera, const vector
     glUniformMatrix4fv(glGetUniformLocation(dados->shaderProgramPlaneta, "projection"), 1, GL_FALSE, globalProjectionMatrix);
     glUniformMatrix4fv(glGetUniformLocation(dados->shaderProgramPlaneta, "model"), 1, GL_FALSE, (float*)modelMatrix);
 
-    // 4. CALCULAR A POSIÇÃO DO SOL (LUZ) NA PERSPETIVA DA CÂMARA
+    // 4. CALCULAR A POSIÇÃO DO SOL (LUZ) NA PERSPETIVA DA CÂMERA
     vec4 posSolMundo = {0.0f, 0.0f, 0.0f, 1.0f};
     vec4 lightPosView;
     glm_mat4_mulv(globalViewMatrix, posSolMundo, lightPosView);
@@ -63,7 +62,6 @@ void renderizarPlaneta(CorpoCeleste *planeta, const vector *camera, const vector
     glEnableVertexAttribArray(1); // Normal
     glEnableVertexAttribArray(2); // Textura UV
 
-    // Passamos os offsets corretos baseados no SPHERE_INFO do teu projeto
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, SPHERE_INFO * sizeof(float), (void*)0);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, SPHERE_INFO * sizeof(float), (void*)(3 * sizeof(float)));
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, SPHERE_INFO * sizeof(float), (void*)(6 * sizeof(float)));

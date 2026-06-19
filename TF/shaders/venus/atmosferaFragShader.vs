@@ -4,19 +4,14 @@ in vec3 FragPos;
 in vec3 Normal;
 in vec2 TexCoord;
 
-// A variável de textura (tem que bater com o C)
 uniform sampler2D texNuvens; 
 uniform vec3 lightPosView;
 
-// A MÁGICA DO MOVIMENTO: O tempo que vem do C
 uniform float tempo; 
 
 void main() {
-    // Pegamos a coordenada original e somamos um pouquinho no eixo X baseado no tempo
-    // O valor 0.02 é a velocidade. Se quiser mais rápido, aumente!
     vec2 uvAnimada = vec2(TexCoord.x + (tempo * 0.02), TexCoord.y);
 
-    // Lemos a textura usando a coordenada nova que está se movendo
     vec4 corDaTextura = texture(texNuvens, uvAnimada);
     
     vec3 norm = normalize(Normal);

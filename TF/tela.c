@@ -100,7 +100,6 @@ void processarInput(GLFWwindow *window) {
 
     float velCaminhada = 0.2f;
 
-    // Se estiver segurando o Shift Esquerdo, multiplica a velocidade!
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
         velCaminhada = 1.0f;
     }
@@ -113,16 +112,14 @@ void processarInput(GLFWwindow *window) {
         camera = addVectors(camera, mulVector(cameraFront, -velCaminhada));
     }
 
-    // ==========================================
-    // CÁLCULO DO VETOR DIREITA PARA O 'A' E 'D'
+
     // Produto vetorial entre cameraFront e o vetor Cima (0, 1, 0)
-    // ==========================================
     vector cameraRight;
     cameraRight.x = -cameraFront.z;
-    cameraRight.y = 0.0f; // Mantemos 0 para não voarmos para cima ao andar de lado
+    cameraRight.y = 0.0f;
     cameraRight.z = cameraFront.x;
 
-    // Normalizando o vetor Direita (para a velocidade não ficar distorcida)
+    // Normalizando o vetor Direita
     float mod = sqrt(cameraRight.x * cameraRight.x + cameraRight.y * cameraRight.y + cameraRight.z * cameraRight.z);
     if (mod > 0.0f) {
         cameraRight.x /= mod;
@@ -130,7 +127,6 @@ void processarInput(GLFWwindow *window) {
         cameraRight.z /= mod;
     }
 
-    // MOVER PARA OS LADOS (STRAFE)
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         camera = addVectors(camera, mulVector(cameraRight, velCaminhada));
     }
@@ -141,12 +137,10 @@ void processarInput(GLFWwindow *window) {
 
     vector cameraUpFixa = {0.0f, 1.0f, 0.0f};
 
-    // Subir (Espaço)
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
         camera = addVectors(camera, mulVector(cameraUpFixa, velCaminhada));
     }
     
-    // Descer (Control Esquerdo)
     if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
         camera = addVectors(camera, mulVector(cameraUpFixa, -velCaminhada));
     }

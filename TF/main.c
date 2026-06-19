@@ -100,8 +100,6 @@ int main() {
     carregarShaderSombras();
     setFramebufferSombras(sistemaSolar+1, numCorposCelestes-1);
 
-    // comandos
-
     printf("\n");
     printf("=======================================================\n");
     printf(" CONTROLES DE VISUALIZACAO:\n");
@@ -121,8 +119,6 @@ int main() {
     printf("  [Mouse 2] - Desacelerar o tempo (Botao Dir.)\n");
     printf("  [ESC]     - Fechar o programa\n");
     printf("=======================================================\n");
-
-    // --------
 
     DadosUniverso *universo = inicializarUniverso();
 

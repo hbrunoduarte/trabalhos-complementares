@@ -59,7 +59,7 @@ void renderizarTerra(CorpoCeleste *terra, const vector *camera, const vector *ca
     glm_rotate(modelMatrix, currentFrame * terra->velocidadeRotacao * 2, (vec3){0.0f, 1.0f, 0.0f});
     glm_scale(modelMatrix, (vec3){raioVisual, raioVisual, raioVisual});
 
-    // 3. COMBINAR VIEW E MODEL (Para o seu Shader que espera a matriz ModelView)
+    // 3. COMBINAR VIEW E MODEL
     mat4 modelViewMatrix;
     glm_mat4_mul(globalViewMatrix, modelMatrix, modelViewMatrix);
 
@@ -72,7 +72,6 @@ void renderizarTerra(CorpoCeleste *terra, const vector *camera, const vector *ca
 
     // 6. CALCULAR A POSIÇÃO DO SOL (Luz) NA VISÃO DA CÂMARA
     // O Sol está na origem do mundo (0, 0, 0). 
-    // Multiplicar (0,0,0,1) pela Matriz View transporta essa coordenada para a perspetiva da câmara!
     vec4 posSolMundo = {0.0f, 0.0f, 0.0f, 1.0f};
     vec4 lightPosView;
     glm_mat4_mulv(globalViewMatrix, posSolMundo, lightPosView);
@@ -138,14 +137,10 @@ void renderizarTerra(CorpoCeleste *terra, const vector *camera, const vector *ca
     glUniformMatrix4fv(glGetUniformLocation(dados->shaderNuvemProgram, "model"), 1, GL_FALSE, (float*)modelMatrix);
     glUniformMatrix4fv(glGetUniformLocation(dados->shaderNuvemProgram, "lightSpaceMatrix"), 1, GL_FALSE, (float*)terra->lightSpaceMatrix);
 
-    // --- CORREÇÃO 1: Enviando o 'tempo' para animar as UVs ---
     glUniform1f(glGetUniformLocation(dados->shaderNuvemProgram, "tempo"), currentFrame);
 
-    // Recalculando a luz
     glUniform3f(glGetUniformLocation(dados->shaderNuvemProgram, "lightPosView"), lightPosView[0], lightPosView[1], lightPosView[2]);
 
-    // --- CORREÇÃO 2: Bind Limpo da Textura ---
-    // O shader de nuvens SÓ precisa da textura de nuvens.
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, dados->idNuvens);
     glUniform1i(glGetUniformLocation(dados->shaderNuvemProgram, "texNuvens"), 0);
@@ -154,7 +149,6 @@ void renderizarTerra(CorpoCeleste *terra, const vector *camera, const vector *ca
     glBindTexture(GL_TEXTURE_2D, terra->depthMap);
     glUniform1i(glGetUniformLocation(dados->shaderNuvemProgram, "shadowMap"), 4);
     
-    // Desenhando o VBO
     glBindBuffer(GL_ARRAY_BUFFER, terra->VBO);
 
     glEnableVertexAttribArray(0); // Posição

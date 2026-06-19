@@ -25,12 +25,11 @@ DadosSaturno* getDadosSaturno() {
     dados->idAnel = carregarTextura("imagens/saturno/saturno-anel.png");
 
     DiscoMesh *anelMesh = criarDiscoArray(1.2f, 2.4f, 60);
-    dados->totalVerticesAnel = anelMesh->numVertices; // Deverá ser exatamente 360
+    dados->totalVerticesAnel = anelMesh->numVertices;
 
     glGenBuffers(1, &dados->vboAnel);
     glBindBuffer(GL_ARRAY_BUFFER, dados->vboAnel);
     
-    // CORREÇÃO CRÍTICA: Multiplicar pelo número 8 de forma forçada e rígida.
     glBufferData(GL_ARRAY_BUFFER, anelMesh->numVertices * 8 * sizeof(float), anelMesh->dados, GL_STATIC_DRAW);
 
     free(anelMesh->dados);
@@ -49,9 +48,7 @@ void renderizarSaturno(CorpoCeleste *saturno, const vector *camera, const vector
     vec4 posSolMundo = {0.0f, 0.0f, 0.0f, 1.0f};
     vec4 lightPosView;
 
-    // ==========================================
-    // PASSO 1: DESENHAR O PLANETA
-    // ==========================================
+    // 1. DESENHAR O PLANETA
     glUseProgram(dados->shaderPlaneta);
 
     glm_mat4_identity(modelMatrix);
@@ -74,16 +71,13 @@ void renderizarSaturno(CorpoCeleste *saturno, const vector *camera, const vector
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
-    // Aqui usamos os apontadores originais do planeta
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, SPHERE_INFO * sizeof(float), (void*)0);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, SPHERE_INFO * sizeof(float), (void*)(3 * sizeof(float)));
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, SPHERE_INFO * sizeof(float), (void*)(6 * sizeof(float)));
 
     glDrawArrays(GL_TRIANGLES, 0, saturno->totalVertices);
 
-    // ==========================================
-    // PASSO 2: DESENHAR O ANEL (O DISCO FÍSICO)
-    // ==========================================
+    // 2. DESENHAR O ANEL
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -105,13 +99,11 @@ void renderizarSaturno(CorpoCeleste *saturno, const vector *camera, const vector
     glBindTexture(GL_TEXTURE_2D, dados->idAnel);
     glUniform1i(glGetUniformLocation(dados->shaderAnel, "texAnel"), 0);
 
-    // CORREÇÃO CRÍTICA DOS ATRIBUTOS
     glBindBuffer(GL_ARRAY_BUFFER, dados->vboAnel);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     
-    // CORREÇÃO CRÍTICA DO DRAW: Usar a quantidade exata de vértices do anel, não do planeta!
     glDrawArrays(GL_TRIANGLES, 0, dados->totalVerticesAnel);
 
     glDisable(GL_BLEND);

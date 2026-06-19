@@ -33,9 +33,7 @@ void renderizarVenus(CorpoCeleste *venus, const vector *camera, const vector *ca
     float raioVisual = calcularRaioVisual(venus);
     vector posicaoVisual = calcularPosicaoVisual(venus);
 
-    // ==========================================
-    // PASSO 1: DESENHAR A SUPERFÍCIE DE VÊNUS
-    // ==========================================
+    // 1. DESENHAR A SUPERFÍCIE DE VÊNUS
     glUseProgram(dados->shaderSuperficie);
 
     mat4 modelMatrix;
@@ -72,16 +70,13 @@ void renderizarVenus(CorpoCeleste *venus, const vector *camera, const vector *ca
 
     glDrawArrays(GL_TRIANGLES, 0, venus->totalVertices);
 
-   // ==========================================
-    // PASSO 2: DESENHAR A ATMOSFERA (Estilo Terra)
-    // ==========================================
+    // 2. DESENHAR A ATMOSFERA
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDepthMask(GL_FALSE); 
 
     glUseProgram(dados->shaderAtmosfera);
 
-    // Escala sutil para a atmosfera ficar rente ao planeta
     glm_mat4_identity(modelMatrix);
     glm_translate(modelMatrix, posicaoVisual.raw);
     glm_rotate(modelMatrix, currentFrame * venus->velocidadeRotacao * 1.2f, (vec3){0.0f, 1.0f, 0.0f}); 
@@ -93,16 +88,13 @@ void renderizarVenus(CorpoCeleste *venus, const vector *camera, const vector *ca
     glUniformMatrix4fv(glGetUniformLocation(dados->shaderAtmosfera, "projection"), 1, GL_FALSE, globalProjectionMatrix);
     glUniformMatrix4fv(glGetUniformLocation(dados->shaderAtmosfera, "model"), 1, GL_FALSE, (float*)modelMatrix);
     
-    // ENVIAR A LUZ E O TEMPO (Igual na Terra)
     glUniform3f(glGetUniformLocation(dados->shaderAtmosfera, "lightPosView"), lightPosView[0], lightPosView[1], lightPosView[2]);
     glUniform1f(glGetUniformLocation(dados->shaderAtmosfera, "tempo"), currentFrame);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, dados->idAtmosfera);
-    // ATENÇÃO AQUI: Como estamos usando o shader da Terra, a variável chama 'texNuvens'
     glUniform1i(glGetUniformLocation(dados->shaderAtmosfera, "texNuvens"), 0);
 
-    // Re-configurar o VBO para desenhar
     glBindBuffer(GL_ARRAY_BUFFER, venus->VBO); 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);

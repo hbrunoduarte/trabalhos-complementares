@@ -62,7 +62,7 @@ void calcularSombras(GLFWwindow *window, CorpoCeleste *sistema, const int numCor
         
         glm_mat4_mul(lightProjection, lightView, sistema[alvo].lightSpaceMatrix);
 
-        // 3. Desenha TODOS os corpos (exceto o Sol) nesta fotografia
+        // 3. Desenha TODOS os corpos (exceto o Sol)
         for (int obj = 0; obj < numCorpos; obj++) {
             mat4 modelShadow;
             glm_mat4_identity(modelShadow);

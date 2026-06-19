@@ -7,7 +7,6 @@ extern mat4 globalViewMatrix;
 DadosUniverso* inicializarUniverso() {
     DadosUniverso *dados = malloc(sizeof(DadosUniverso));
 
-    // Reaproveitamos o Vertex Shader dos planetas, mas usamos o nosso novo Frag Shader simples
     char *vertCeu = lerArquivo("shaders/planeta/planetaVertexShader.vs");
     char *fragCeu = lerArquivo("shaders/universo/ceuFragShader.vs");
     dados->shaderCeu = carregarShader(vertCeu, fragCeu, NULL);
@@ -22,7 +21,6 @@ DadosUniverso* inicializarUniverso() {
     glGenBuffers(1, &dados->vboCeu);
     glBindBuffer(GL_ARRAY_BUFFER, dados->vboCeu);
     
-    // A sua esfera tem 11 floats (SPHERE_INFO) por vértice
     glBufferData(GL_ARRAY_BUFFER, ceuMesh->numVertices * SPHERE_INFO * sizeof(float), ceuMesh->dados, GL_STATIC_DRAW);
 
     free(ceuMesh->dados);
@@ -32,7 +30,6 @@ DadosUniverso* inicializarUniverso() {
 }
 
 void renderizarUniverso(DadosUniverso *dados, const vector *camera) {
-    // O SEGREDO DO FUNDO INFINITO: Desliga a anotação de profundidade!
     glDepthMask(GL_FALSE);
     
     glUseProgram(dados->shaderCeu);
@@ -40,7 +37,6 @@ void renderizarUniverso(DadosUniverso *dados, const vector *camera) {
     mat4 modelMatrix;
     glm_mat4_identity(modelMatrix);
     
-    // O TRUQUE DA PASSADEIRA: A esfera das estrelas vai sempre para a posição exata da câmera!
     glm_translate(modelMatrix, camera->raw); 
     
     mat4 modelViewMatrix;
@@ -70,6 +66,5 @@ void renderizarUniverso(DadosUniverso *dados, const vector *camera) {
     glDisableVertexAttribArray(2);
     glUseProgram(0);
     
-    // Liga a profundidade de novo para que os planetas sejam desenhados normalmente
     glDepthMask(GL_TRUE); 
 }

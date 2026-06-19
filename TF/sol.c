@@ -65,7 +65,6 @@ void renderizarSol(CorpoCeleste *sol, vector *camera, vector *cameraFront, float
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, SPHERE_INFO * sizeof(float), (void*)0);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, SPHERE_INFO * sizeof(float), (void*)(6 * sizeof(float)));
 
-    // Bate o carimbo da esfera!
     glDrawArrays(GL_TRIANGLES, 0, sol->totalVertices);
 
     // Desliga tudo para limpar o estado
