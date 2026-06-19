@@ -98,7 +98,12 @@ void processarInput(GLFWwindow *window) {
     cameraFront.y = sin(pitchRad);
     cameraFront.z = sin(yawRad) * cos(pitchRad);
 
-    float velCaminhada = 1.0f;
+    float velCaminhada = 0.2f;
+
+    // Se estiver segurando o Shift Esquerdo, multiplica a velocidade!
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+        velCaminhada = 1.0f;
+    }
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
         camera = addVectors(camera, mulVector(cameraFront, velCaminhada));
@@ -106,6 +111,44 @@ void processarInput(GLFWwindow *window) {
 
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
         camera = addVectors(camera, mulVector(cameraFront, -velCaminhada));
+    }
+
+    // ==========================================
+    // CÁLCULO DO VETOR DIREITA PARA O 'A' E 'D'
+    // Produto vetorial entre cameraFront e o vetor Cima (0, 1, 0)
+    // ==========================================
+    vector cameraRight;
+    cameraRight.x = -cameraFront.z;
+    cameraRight.y = 0.0f; // Mantemos 0 para não voarmos para cima ao andar de lado
+    cameraRight.z = cameraFront.x;
+
+    // Normalizando o vetor Direita (para a velocidade não ficar distorcida)
+    float mod = sqrt(cameraRight.x * cameraRight.x + cameraRight.y * cameraRight.y + cameraRight.z * cameraRight.z);
+    if (mod > 0.0f) {
+        cameraRight.x /= mod;
+        cameraRight.y /= mod;
+        cameraRight.z /= mod;
+    }
+
+    // MOVER PARA OS LADOS (STRAFE)
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        camera = addVectors(camera, mulVector(cameraRight, velCaminhada));
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        camera = addVectors(camera, mulVector(cameraRight, -velCaminhada));
+    }
+
+    vector cameraUpFixa = {0.0f, 1.0f, 0.0f};
+
+    // Subir (Espaço)
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+        camera = addVectors(camera, mulVector(cameraUpFixa, velCaminhada));
+    }
+    
+    // Descer (Control Esquerdo)
+    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
+        camera = addVectors(camera, mulVector(cameraUpFixa, -velCaminhada));
     }
 
     if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {

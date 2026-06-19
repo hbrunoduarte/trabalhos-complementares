@@ -98,6 +98,30 @@ int main() {
     carregarShaderSombras();
     setFramebufferSombras(sistemaSolar+1, numCorposCelestes-1);
 
+    // comandos
+
+    printf("\n");
+    printf("=======================================================\n");
+    printf(" CONTROLES DE VISUALIZACAO:\n");
+    printf("=======================================================\n");
+    printf(" [W] / [S]        - Mover para frente / tras\n");
+    printf(" [A] / [D]        - Mover para a esquerda / direita\n");
+    printf(" [Setas / Mouse ] - Mexer a camera\n");
+    printf(" [Scroll]         - Ajuste de zoom\n");
+    printf(" [SHIFT ESQ]      - Segurar para movimento rápido\n");
+    printf(" [ESPACO]         - Mover para cima\n");
+    printf(" [CTRL ESQ]       - Mover para baixo\n");
+    printf("=======================================================\n");
+    printf(" OUTROS CONTROLES:\n");
+    printf("=======================================================\n");
+    printf("  [K] / [L] - Pausar / Retomar movimento dos planetas\n");
+    printf("  [Mouse 1] - Acelerar o tempo (Botao Esq.)\n");
+    printf("  [Mouse 2] - Desacelerar o tempo (Botao Dir.)\n");
+    printf("  [ESC]     - Fechar o programa\n");
+    printf("=======================================================\n");
+
+    // --------
+
     while (!glfwWindowShouldClose(window) && running) {
 
         float currentFrame = glfwGetTime();
