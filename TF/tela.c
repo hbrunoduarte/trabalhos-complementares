@@ -174,7 +174,7 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
 
     float proporcaoAtual = (float)width / (float)height;
 
-    glm_perspective(glm_rad(45.0f), proporcaoAtual, 0.1f, 300.0f, globalProjectionMatrix);
+    glm_perspective(glm_rad(45.0f), proporcaoAtual, 0.1f, 2000.0f, globalProjectionMatrix);
 }
 
 GLFWwindow* configurarTela() {

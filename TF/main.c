@@ -124,6 +124,8 @@ int main() {
 
     // --------
 
+    DadosUniverso *universo = inicializarUniverso();
+
     while (!glfwWindowShouldClose(window) && running) {
 
         float currentFrame = glfwGetTime();
@@ -139,6 +141,8 @@ int main() {
         }
 
         calcularSombras(window, sistemaSolar+1, numCorposCelestes-1);
+
+        renderizarUniverso(universo, &camera);
 
         for (int i = 0; i < numCorposCelestes; i++)
             sistemaSolar[i].renderizar(&sistemaSolar[i], &camera, &cameraFront, currentFrame);

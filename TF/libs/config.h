@@ -64,6 +64,7 @@ typedef enum {
 #include "planeta.h"
 #include "venus.h"
 #include "saturno.h"
+#include "universo.h"
 
 char* lerArquivo(const char *caminho);
 GLuint carregarShader(const char *vertexShaderSource, const char *fragShaderSource, const char *libSource);
