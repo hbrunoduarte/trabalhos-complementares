@@ -42,7 +42,7 @@ int main() {
     free(terraMesh->dados);
     free(terraMesh);
     
-    int numCorposCelestes = 9;
+    int numCorposCelestes = 10;
     CorpoCeleste *sistemaSolar = malloc(sizeof(CorpoCeleste) * numCorposCelestes);
 
     sistemaSolar[SOL] = criarCorpoCeleste(1.9891e30, 1408.0f, VETOR_NULO,
@@ -72,7 +72,9 @@ int main() {
                                              renderizarPlaneta, getDadosPlaneta("imagens/jupiter/jupiter.jpg"), 
                                              &sistemaSolar[SOL]);
 
-    // sistemaSolar[SATURNO] = x
+    sistemaSolar[SATURNO] = criarCorpoCeleste(5.6834e26, 687.0f, VETOR_NULO,
+                                              1433.5e6, 4.4e-4f, 5.3e-2f,
+                                              renderizarSaturno, getDadosSaturno(), &sistemaSolar[SOL]);
 
     sistemaSolar[URANO] = criarCorpoCeleste(8.6810e25, 1270.0f, VETOR_NULO,
                                            2871e6, 2.4e-5f, 9.7e-2f,
@@ -106,7 +108,7 @@ int main() {
     printf("=======================================================\n");
     printf(" [W] / [S]        - Mover para frente / tras\n");
     printf(" [A] / [D]        - Mover para a esquerda / direita\n");
-    printf(" [Setas / Mouse ] - Mexer a camera\n");
+    printf(" [Setas / Mouse] - Mexer a camera\n");
     printf(" [Scroll]         - Ajuste de zoom\n");
     printf(" [SHIFT ESQ]      - Segurar para movimento rápido\n");
     printf(" [ESPACO]         - Mover para cima\n");

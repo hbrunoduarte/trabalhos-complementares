@@ -8,6 +8,13 @@ typedef struct {
     int numVertices;
 } EsferaMesh;
 
+typedef struct {
+    float *dados;
+    int numVertices;
+} DiscoMesh;
+
+DiscoMesh* criarDiscoArray(float raioInterno, float raioExterno, int segmentos);
+
 void addVertice(float* array, int* index, float r, float phi, float theta);
 EsferaMesh* criarEsferaArray(float r, unsigned int pTheta, unsigned int pPhi);
 

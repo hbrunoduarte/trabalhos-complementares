@@ -52,7 +52,7 @@ typedef struct corpo_celeste {
 
 typedef void(*funcaoRenderizacao)(struct corpo_celeste* self, const vector* camera, const vector* cameraFront, float currentFrame);
 typedef enum {
-    SOL, MERCURIO, VENUS, TERRA, MARTE, JUPITER, URANO, NETUNO, LUA
+    SOL, MERCURIO, VENUS, TERRA, MARTE, JUPITER, SATURNO, URANO, NETUNO, LUA
 } Planetas;
 
 #include "sombra.h"
@@ -63,6 +63,7 @@ typedef enum {
 #include "malha.h"
 #include "planeta.h"
 #include "venus.h"
+#include "saturno.h"
 
 char* lerArquivo(const char *caminho);
 GLuint carregarShader(const char *vertexShaderSource, const char *fragShaderSource, const char *libSource);

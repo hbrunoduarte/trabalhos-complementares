@@ -65,3 +65,44 @@ EsferaMesh* criarEsferaArray(float r, unsigned int pTheta, unsigned int pPhi) {
     
     return malha;
 }
+
+DiscoMesh* criarDiscoArray(float raioInterno, float raioExterno, int segmentos) {
+    int numVertices = segmentos * 6; 
+    // Forçamos o uso de 8 floats por vértice (3 Posição, 3 Normal, 2 UV)
+    float *dados = malloc(numVertices * 8 * sizeof(float)); 
+    
+    float anguloPasso = (2.0f * M_PI) / segmentos;
+    int index = 0;
+    
+    for (int i = 0; i < segmentos; i++) {
+        float ang = i * anguloPasso;
+        float proxAng = (i + 1) * anguloPasso;
+        
+        float x1_in = raioInterno * cos(ang), z1_in = raioInterno * sin(ang);
+        float x1_out = raioExterno * cos(ang), z1_out = raioExterno * sin(ang);
+        float x2_in = raioInterno * cos(proxAng), z2_in = raioInterno * sin(proxAng);
+        float x2_out = raioExterno * cos(proxAng), z2_out = raioExterno * sin(proxAng);
+        
+        float u_in = 0.0f;
+        float u_out = 1.0f;
+        float v1 = (float)i / segmentos;
+        float v2 = (float)(i + 1) / segmentos;
+
+        float nx = 0.0f, ny = 1.0f, nz = 0.0f; 
+
+        // Triângulo 1 (8 dados por vértice)
+        dados[index++] = x1_in;  dados[index++] = 0.0f; dados[index++] = z1_in;  dados[index++] = nx; dados[index++] = ny; dados[index++] = nz; dados[index++] = u_in;  dados[index++] = v1;
+        dados[index++] = x1_out; dados[index++] = 0.0f; dados[index++] = z1_out; dados[index++] = nx; dados[index++] = ny; dados[index++] = nz; dados[index++] = u_out; dados[index++] = v1;
+        dados[index++] = x2_in;  dados[index++] = 0.0f; dados[index++] = z2_in;  dados[index++] = nx; dados[index++] = ny; dados[index++] = nz; dados[index++] = u_in;  dados[index++] = v2;
+        
+        // Triângulo 2 (8 dados por vértice)
+        dados[index++] = x1_out; dados[index++] = 0.0f; dados[index++] = z1_out; dados[index++] = nx; dados[index++] = ny; dados[index++] = nz; dados[index++] = u_out; dados[index++] = v1;
+        dados[index++] = x2_out; dados[index++] = 0.0f; dados[index++] = z2_out; dados[index++] = nx; dados[index++] = ny; dados[index++] = nz; dados[index++] = u_out; dados[index++] = v2;
+        dados[index++] = x2_in;  dados[index++] = 0.0f; dados[index++] = z2_in;  dados[index++] = nx; dados[index++] = ny; dados[index++] = nz; dados[index++] = u_in;  dados[index++] = v2;
+    }
+    
+    DiscoMesh *mesh = malloc(sizeof(DiscoMesh));
+    mesh->dados = dados;
+    mesh->numVertices = numVertices;
+    return mesh;
+}
