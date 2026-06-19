@@ -9,12 +9,9 @@ SRCS = $(wildcard *.c)
 # Nome do executável
 TARGET_SOLAR = main.out
 
-# Regras de Compilação
-$(TARGET_SOLAR): $(SRCS)
-	$(CC) $(CFLAGS) $(SRCS) $(LIBS) -o $(TARGET_SOLAR)
 
-run: $(TARGET_SOLAR)
-	./$(TARGET_SOLAR)
+run: $(SRCS)
+	$(CC) $(CFLAGS) $(SRCS) $(LIBS) -o $(TARGET_SOLAR) && ./$(TARGET_SOLAR)
 
 # Limpeza dos arquivos binários
 clean:

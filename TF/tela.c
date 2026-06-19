@@ -140,15 +140,16 @@ GLFWwindow* configurarTela() {
         fprintf(stderr, "Falha ao inicializar o GLFW\n");
         exit(-1);
     }
-
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Minha Primeira Janela GLFW em C", NULL, NULL);
+    
+    GLFWwindow* window = glfwCreateWindow(800, 600, "Sistema Solar", NULL, NULL);
     
     if (!window) {
         fprintf(stderr, "Falha ao criar a janela GLFW\n");
         glfwTerminate();
         exit(-1);
     }
-    
+    glfwPollEvents();
+    glfwMaximizeWindow(window);
     glfwMakeContextCurrent(window);
 
     glewExperimental = GL_TRUE; 
