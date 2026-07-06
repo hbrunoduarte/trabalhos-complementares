@@ -5,7 +5,7 @@
 
 #define CONSTANTE_GRAVITACIONAL 6.6743e-20f
 #define DISTANCIA_TERRA_SOL 149597870.7f // 1 AU (Unidade Astronómica) em km
-#define ESCALA_VISUAL_BASE 40.0f
+#define ESCALA_VISUAL_BASE 60.0f
 #define SIZE_RATIO 12742000.0f
 
 void atualizarFisica(CorpoCeleste *corpo, float deltaTime);

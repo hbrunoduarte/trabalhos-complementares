@@ -2,6 +2,7 @@
 #define _MALHA_H
 
 #define SPHERE_INFO 11
+#define DISK_INFO 8
 
 typedef struct {
     float *dados;

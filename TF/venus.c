@@ -5,10 +5,11 @@ extern mat4 globalProjectionMatrix;
 extern mat4 globalViewMatrix;
 
 void compilarShaderVenus(DadosVenus *dados) {
-    // 1. Superfície (Usa o genérico normal)
+    
+    char *lib = lerArquivo(SHADER_LIB_CAMINHO);
     char *vertPlaneta = lerArquivo("shaders/planeta/planetaVertexShader.vs");
     char *fragPlaneta = lerArquivo("shaders/planeta/planetaFragShader.vs");
-    dados->shaderSuperficie = carregarShader(vertPlaneta, fragPlaneta, NULL);
+    dados->shaderSuperficie = carregarShader(vertPlaneta, fragPlaneta, lib);
 
     // 2. Atmosfera (Usa o vertex genérico, mas o frag shader animado de Vênus)
     char *fragAtmosfera = lerArquivo("shaders/venus/atmosferaFragShader.vs");
@@ -16,6 +17,7 @@ void compilarShaderVenus(DadosVenus *dados) {
 
     free(vertPlaneta);
     free(fragPlaneta);
+    free(lib);
     free(fragAtmosfera);
 }
 
@@ -28,7 +30,7 @@ DadosVenus* getDadosVenus() {
     return dados;
 }
 
-void renderizarVenus(CorpoCeleste *venus, const vector *camera, const vector *cameraFront, float currentFrame) {
+void renderizarVenus(CorpoCeleste *venus, const vector *camera, float currentFrame) {
     DadosVenus *dados = (DadosVenus*) venus->dadosVisuais;
     float raioVisual = calcularRaioVisual(venus);
     vector posicaoVisual = calcularPosicaoVisual(venus);
@@ -58,16 +60,19 @@ void renderizarVenus(CorpoCeleste *venus, const vector *camera, const vector *ca
     glBindTexture(GL_TEXTURE_2D, dados->idSuperficie);
     glUniform1i(glGetUniformLocation(dados->shaderSuperficie, "texPlaneta"), 0);
 
+    glUniform1i(glGetUniformLocation(dados->shaderSuperficie, "isGasoso"), 1); // Saturno é gasoso
+    glUniform1i(glGetUniformLocation(dados->shaderSuperficie, "recebeSombras"), 1); // Recebe sombras dos anéis/luas
+    glUniform1f(glGetUniformLocation(dados->shaderSuperficie, "alphaMultiplicador"), 1.0f); // Impede que fique invisível
+    glUniform1f(glGetUniformLocation(dados->shaderSuperficie, "tempo"), currentFrame); // Mantém os gases girando
+
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, venus->depthMap);
+    glUniform1i(glGetUniformLocation(dados->shaderSuperficie, "shadowMap"), 4);
+    glUniformMatrix4fv(glGetUniformLocation(dados->shaderSuperficie, "lightSpaceMatrix"), 1, GL_FALSE, (float*)venus->lightSpaceMatrix);
+
+
     // Configurar o VBO para a superfície
-    glBindBuffer(GL_ARRAY_BUFFER, venus->VBO);
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
-    glEnableVertexAttribArray(2);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, SPHERE_INFO * sizeof(float), (void*)0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, SPHERE_INFO * sizeof(float), (void*)(3 * sizeof(float)));
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, SPHERE_INFO * sizeof(float), (void*)(6 * sizeof(float)));
-
+    glBindVertexArray(venus->VAO);
     glDrawArrays(GL_TRIANGLES, 0, venus->totalVertices);
 
     // 2. DESENHAR A ATMOSFERA
@@ -95,22 +100,12 @@ void renderizarVenus(CorpoCeleste *venus, const vector *camera, const vector *ca
     glBindTexture(GL_TEXTURE_2D, dados->idAtmosfera);
     glUniform1i(glGetUniformLocation(dados->shaderAtmosfera, "texNuvens"), 0);
 
-    glBindBuffer(GL_ARRAY_BUFFER, venus->VBO); 
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
-    glEnableVertexAttribArray(2);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, SPHERE_INFO * sizeof(float), (void*)0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, SPHERE_INFO * sizeof(float), (void*)(3 * sizeof(float)));
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, SPHERE_INFO * sizeof(float), (void*)(6 * sizeof(float)));
-
     glDrawArrays(GL_TRIANGLES, 0, venus->totalVertices);
+    glBindVertexArray(0);
 
     // Limpeza
     glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
-    glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(1);
-    glDisableVertexAttribArray(2);
+    glBindVertexArray(0);
     glUseProgram(0);
 }

@@ -13,13 +13,11 @@ void main() {
    vec3 lightDir = normalize(lightPosView - FragPos);
 
    float luzDaRotacao = dot(norm, lightDir);
-   float valorSombra = calcularSombra(FragPosLightSpace, norm, lightDir);
+   float valorSombra = calcularSombra(FragPosLightSpace, norm, lightDir, false);
    
    float impactoLuz = luzDaRotacao > 0.0 ? luzDaRotacao * (1.0 - valorSombra) : luzDaRotacao;  
-   // Desliza a textura suavemente para o lado
    vec2 uvAnimada = TexCoord + vec2(tempo * 0.02, 0.0);
    
-   // Lê a textura usando o UV animado!
    vec4 corNuvem = texture(texNuvens, uvAnimada);
    
    vec3 corFinal = vec3(1.0) * impactoLuz;

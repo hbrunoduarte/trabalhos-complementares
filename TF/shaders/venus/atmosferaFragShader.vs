@@ -24,7 +24,7 @@ void main() {
     vec3 corFinal = (ambient + diff) * corDaTextura.rgb;
 
     // Transparência
-    float alpha = dot(corDaTextura.rgb, vec3(0.299, 0.587, 0.114));
+    float alpha = dot(corDaTextura.rgb, vec3(0.4, 0.587, 0.114));
 
     FragColor = vec4(corFinal, alpha * (diff + 0.1));
 }

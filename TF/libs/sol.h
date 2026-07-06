@@ -7,6 +7,6 @@ typedef struct {
 } DadosSol;
 
 DadosSol* getDadosSol();
-void renderizarSol(CorpoCeleste *sol, vector *camera, vector *cameraFront, float currentFrame);
+void renderizarSol(CorpoCeleste *sol, vector *camera, float currentFrame);
 
 #endif

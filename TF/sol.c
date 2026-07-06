@@ -24,7 +24,7 @@ DadosSol* getDadosSol() {
     return dados;
 }
 
-void renderizarSol(CorpoCeleste *sol, vector *camera, vector *cameraFront, float currentFrame) {
+void renderizarSol(CorpoCeleste *sol, vector *camera, float currentFrame) {
     
     DadosSol *dados = (DadosSol*) sol->dadosVisuais;
     float raioVisual = calcularRaioVisual(sol);
@@ -58,17 +58,9 @@ void renderizarSol(CorpoCeleste *sol, vector *camera, vector *cameraFront, float
     glBindTexture(GL_TEXTURE_2D, dados->idTextura);
     glUniform1i(glGetUniformLocation(dados->shaderProgramSol, "texSol"), 0);
 
-    // Diz ao VBO como ler os dados (Posição = 0, UV = 2)
-    glBindBuffer(GL_ARRAY_BUFFER, sol->VBO);
-    glEnableVertexAttribArray(0); // Posição
-    glEnableVertexAttribArray(2); // Textura UV
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, SPHERE_INFO * sizeof(float), (void*)0);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, SPHERE_INFO * sizeof(float), (void*)(6 * sizeof(float)));
-
+    glBindVertexArray(sol->VAO);
     glDrawArrays(GL_TRIANGLES, 0, sol->totalVertices);
 
-    // Desliga tudo para limpar o estado
-    glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(2);
+    glBindVertexArray(0);
     glUseProgram(0);
 }

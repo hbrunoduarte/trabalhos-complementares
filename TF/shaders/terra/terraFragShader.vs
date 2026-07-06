@@ -20,7 +20,7 @@ void main() {
    vec3 lightDir = normalize(lightPosView - FragPos);
    
    float luzDaRotacao = dot(norm, lightDir);
-   float valorSombra = calcularSombra(FragPosLightSpace, norm, lightDir);
+   float valorSombra = calcularSombra(FragPosLightSpace, norm, lightDir, false);
    
    float impactoLuz = luzDaRotacao > 0.0 ? luzDaRotacao * (1.0 - valorSombra) : luzDaRotacao;
    

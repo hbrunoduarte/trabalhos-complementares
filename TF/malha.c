@@ -24,11 +24,11 @@ void addVertice(float* array, int* index, float r, float phi, float theta) {
 EsferaMesh* criarEsferaArray(float r, unsigned int pTheta, unsigned int pPhi) {
     EsferaMesh *malha = malloc(sizeof(EsferaMesh));
     
-    // Cada "quadrado" na malha da esfera precisa de 2 triângulos.
-    // 2 triângulos * 3 vértices cada = 6 vértices por quadrado.
+    // Cada "quadrado" na malha da esfera precisa de 2 triângulos
+    // 2 triângulos * 3 vértices cada = 6 vértices por quadrado
     malha->numVertices = pPhi * pTheta * 6;
     
-    // Cada vértice ocupa 6 floats na memória (3 de posição + 3 de normal + 2 de textura + 3 de normal mapping)
+    // Cada vértice ocupa 11 floats na memória (3 de posição + 3 de normal + 2 de textura + 3 de normal mapping)
     malha->dados = malloc(malha->numVertices * SPHERE_INFO * sizeof(float));
     
     int index = 0;
@@ -68,8 +68,8 @@ EsferaMesh* criarEsferaArray(float r, unsigned int pTheta, unsigned int pPhi) {
 
 DiscoMesh* criarDiscoArray(float raioInterno, float raioExterno, int segmentos) {
     int numVertices = segmentos * 6; 
-    // Forçamos o uso de 8 floats por vértice (3 Posição, 3 Normal, 2 UV)
-    float *dados = malloc(numVertices * 8 * sizeof(float)); 
+    // Uso de 8 floats por vértice (3 Posição, 3 Normal, 2 UV)
+    float *dados = malloc(numVertices * DISK_INFO * sizeof(float)); 
     
     float anguloPasso = (2.0f * M_PI) / segmentos;
     int index = 0;

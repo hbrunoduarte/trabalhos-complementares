@@ -9,6 +9,6 @@ typedef struct {
 } DadosVenus;
 
 DadosVenus* getDadosVenus();
-void renderizarVenus(CorpoCeleste *venus, const vector *camera, const vector *cameraFront, float currentFrame);
+void renderizarVenus(CorpoCeleste *venus, const vector *camera, float currentFrame);
 
 #endif

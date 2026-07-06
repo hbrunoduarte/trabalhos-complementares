@@ -8,9 +8,10 @@ typedef struct {
     GLint idTerraNoite;
     GLint idNuvens;
     GLint idNormal;
+    GLuint idHeight;
 } DadosTerra;
 
 DadosTerra* getDadosTerra();
-void renderizarTerra(CorpoCeleste *terra, const vector *camera, const vector *cameraFront, float currentFrame);
+void renderizarTerra(CorpoCeleste *terra, const vector *camera, float currentFrame);
 
 #endif
