@@ -18,6 +18,8 @@ extern booleano pause;
 
 extern mat4 globalViewMatrix;
 
+float tempoAcumulado = 0.0f;
+
 void menuControle() {
     printf("\n");
     printf("=======================================================\n");
@@ -220,6 +222,7 @@ int main() {
         updateCamera(window);
 
         if (!pause) {
+            tempoAcumulado += deltaTime * speedTime;
             for (int i = 1; i < numCorposCelestes; i++) { // Ignora o Sol (0) para mantê-lo fixo no centro
                 atualizarFisica(&sistemaSolar[i], speedTime * deltaTime);
             }

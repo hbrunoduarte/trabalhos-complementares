@@ -8,6 +8,7 @@
 
 extern mat4 globalProjectionMatrix;
 extern mat4 globalViewMatrix;
+extern float tempoAcumulado;
 
 void compilarShaderAsteroide(DadosAsteroide *dados) {
 
@@ -67,7 +68,7 @@ void renderizarAsteroide(CorpoCeleste *asteroide, const vector *camera, float cu
     glUniform3fv(glGetUniformLocation(dados->shaderProgram, "lightPos"), 1, lightPos);
     glUniform3fv(glGetUniformLocation(dados->shaderProgram, "viewPos"), 1, camera->raw);
     glUniform1f(glGetUniformLocation(dados->shaderProgram, "velAngular"), asteroide->velocidadeAngular);
-    glUniform1f(glGetUniformLocation(dados->shaderProgram, "tempo"), currentFrame);
+    glUniform1f(glGetUniformLocation(dados->shaderProgram, "tempo"), tempoAcumulado);
 
     glBindVertexArray(asteroide->VAO);
     glDrawArraysInstanced(GL_TRIANGLES, 0, asteroide->totalVertices, QTD_ASTEROIDES);
