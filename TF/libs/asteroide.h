@@ -3,7 +3,7 @@
 
 #include "config.h"
 
-#define QTD_ASTEROIDES 20
+#define QTD_ASTEROIDES 30
 
 typedef struct {
     GLuint idOclusao;
