@@ -223,7 +223,7 @@ int main() {
 
         if (!pause) {
             tempoAcumulado += deltaTime * speedTime;
-            for (int i = 1; i < numCorposCelestes; i++) { // Ignora o Sol (0) para mantê-lo fixo no centro
+            for (int i = 1; i < numCorposCelestes; i++) { // Ignora o Sol para mantê-lo fixo no centro
                 atualizarFisica(&sistemaSolar[i], speedTime * deltaTime);
             }
         }

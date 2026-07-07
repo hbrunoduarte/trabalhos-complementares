@@ -45,8 +45,6 @@ void main() {
 
     FragPosLightSpace = lightSpaceMatrix * vec4(WorldPos, 1.0);
 
-    // Aplica a mesma matriz animada nos cálculos de Normal e Tangente
-    // Isso garante que a luz bata corretamente enquanto as pedras giram
     vec3 T = normalize(vec3(matrizAnimada * vec4(aTangent, 0.0)));
     vec3 N = normalize(vec3(matrizAnimada * vec4(aNormal, 0.0)));
     T = normalize(T - dot(T, N) * N); 

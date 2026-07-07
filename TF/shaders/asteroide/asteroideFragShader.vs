@@ -45,7 +45,7 @@ void main() {
 
    float shadow = calcularSombra(FragPosLightSpace, normal, lightDir, false);
 
-   // ADICIONADO: A sombra afeta apenas as luzes Direta (Difusa) e Especular
+   // A sombra afeta apenas as luzes Direta (Difusa) e Especular
    vec3 finalLighting = ambient + (1.0 - shadow) * (diffuse + specular);
 
    FragColor = vec4(finalLighting, 1.0);

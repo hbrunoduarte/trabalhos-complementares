@@ -102,7 +102,6 @@ void inicializarCinturao(CorpoCeleste *asteroideBase, float desvio) {
         
         glm_translate(model, (vec3){x, y, z});
 
-        // CORREÇÃO 3: Multiplicar a variação aleatória pelo raio visual
         float variacao = ((float)rand() / (float)RAND_MAX * 0.5f) + 0.1f;
         float escalaFinal = variacao * raioVisualAsteroide;
         glm_scale(model, (vec3){escalaFinal, escalaFinal, escalaFinal});

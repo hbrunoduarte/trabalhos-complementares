@@ -32,28 +32,20 @@ void renderizarSol(CorpoCeleste *sol, vector *camera, float currentFrame) {
     glActiveTexture(GL_TEXTURE0); 
     glBindTexture(GL_TEXTURE_2D, dados->idTextura); 
 
-    // Ativa o Shader do Sol
     glUseProgram(dados->shaderProgramSol);
 
-    // calcula as transformações sobre o modelo
     mat4 modelMatrix;
     glm_mat4_identity(modelMatrix);
     glm_scale(modelMatrix, (vec3){raioVisual, raioVisual, raioVisual});
 
-    // coloca o modelo em relação à câmera
     mat4 modelViewSol;
     glm_mat4_mul(globalViewMatrix, modelMatrix, modelViewSol);
 
-
-    // Envia as matrizes para o Shader
     glUniformMatrix4fv(glGetUniformLocation(dados->shaderProgramSol, "modelView"), 1, GL_FALSE, modelViewSol);
     glUniformMatrix4fv(glGetUniformLocation(dados->shaderProgramSol, "projection"), 1, GL_FALSE, globalProjectionMatrix);
 
-    // Envia o TEMPO para animar o plasma
-    // Usamos currentFrame que você já calcula no seu loop (glfwGetTime())
     glUniform1f(glGetUniformLocation(dados->shaderProgramSol, "tempo"), currentFrame);
 
-    // Ativa a gaveta da textura do Sol
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, dados->idTextura);
     glUniform1i(glGetUniformLocation(dados->shaderProgramSol, "texSol"), 0);

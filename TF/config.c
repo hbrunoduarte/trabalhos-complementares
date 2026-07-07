@@ -27,34 +27,6 @@ char* lerArquivo(const char *caminho) {
     return conteudo;
 }
 
-/*GLuint carregarShader(const char *vertexShaderSource, const char *fragShaderSource, const char *libSource) {
-
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    const char* vertexStrings[2] = { "#version 330 core\n", vertexShaderSource };
-    glShaderSource(vertexShader, 2, vertexStrings, NULL);
-    glCompileShader(vertexShader);
-
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    const char* fragStrings[3];
-    fragStrings[0] = "#version 330 core\n";
-    fragStrings[1] = libSource ? libSource : ""; // Se não houver biblioteca, envia vazio
-    fragStrings[2] = fragShaderSource;
-    
-    glShaderSource(fragmentShader, 3, fragStrings, NULL);
-    glCompileShader(fragmentShader);
-
-    // --- LINKAGEM ---
-    GLuint shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
-    return shaderProgram;
-}*/
-
 GLuint carregarShader(const char *vertexShaderSource, const char *fragShaderSource, const char *libSource) {
     
     int success;
@@ -120,7 +92,7 @@ GLuint carregarTextura(const char* caminho) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    // O OpenGL inverte o eixo Y em relação às imagens comuns, então pedimos ao stb para consertar
+    // O OpenGL inverte o eixo Y em relação às imagens comuns
     stbi_set_flip_vertically_on_load(1);
 
     int largura, altura, canaisCores;

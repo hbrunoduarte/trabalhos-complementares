@@ -45,14 +45,12 @@ void calcularSombras(GLFWwindow *window, CorpoCeleste *sistema, const int numCor
         glBindFramebuffer(GL_FRAMEBUFFER, sistema[alvo].depthMapFBO);
         glClear(GL_DEPTH_BUFFER_BIT);
 
-        // Identifica se o alvo atual é o anel, compensando o array (sistemaSolar+1)
         int ehAlvoAnel = (alvo == ANEL_SATURNO - 1);
 
         vector posVisAlvo = calcularPosicaoVisual(!ehAlvoAnel ? &sistema[alvo] : sistema[alvo].orbita);
         float raioAlvo = calcularRaioVisual(!ehAlvoAnel ? &sistema[alvo] : sistema[alvo].orbita);
         vec3 up = {0.0f, 1.0f, 0.0f};
 
-        // CORREÇÃO: Expansão da margem para cobrir o raio extremo do anel (2.4x)
         float margem = raioAlvo * 2.5f;
         
         mat4 lightProjection, lightView;
@@ -80,13 +78,13 @@ void calcularSombras(GLFWwindow *window, CorpoCeleste *sistema, const int numCor
             mat4 modelShadow;
             glm_mat4_identity(modelShadow);
             
-            // CORREÇÃO: Se o objeto for o anel, posiciona-o em Saturno para projetar a sombra corretamente
+            // Se o objeto for o anel, posiciona-o em Saturno para projetar a sombra corretamente
             vector pVis = calcularPosicaoVisual(!ehObjAnel ? &sistema[obj] : sistema[obj].orbita);
             float rVis = calcularRaioVisual(!ehObjAnel ? &sistema[obj] : sistema[obj].orbita);
             
             glm_translate(modelShadow, pVis.raw);
             
-            // Aplica a inclinação fixa do anel para que a sombra no planeta fique na diagonal correta
+            // Aplica a inclinação fixa do anel para que a sombra no planeta correta
             if (ehObjAnel) {
                 glm_rotate(modelShadow, sistema[obj].velocidadeRotacao, (vec3){0.0f, 0.0f, 1.0f}); 
             }

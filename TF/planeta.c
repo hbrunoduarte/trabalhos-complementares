@@ -65,7 +65,6 @@ void renderizarPlaneta(CorpoCeleste *planeta, const vector *camera, float curren
         
         float alphaLayer = (i == 0) ? 1.0f : 0.25f / i; 
 
-        // 4. CÁLCULO DA MATRIZ MODEL
         mat4 modelMatrix;
         glm_mat4_identity(modelMatrix);
         glm_translate(modelMatrix, posicaoVisual.raw);

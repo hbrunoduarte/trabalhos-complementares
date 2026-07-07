@@ -4,22 +4,18 @@ float calcularSombra(vec4 posLuz, vec3 normal, vec3 lightDir, bool ehTranslucido
     vec3 projCoords = posLuz.xyz / posLuz.w;
     projCoords = projCoords * 0.5 + 0.5;
 
-    // 1. CORREÇÃO DE VAZAMENTO
     if(projCoords.z > 1.0 || projCoords.x < 0.0 || projCoords.x > 1.0 || projCoords.y < 0.0 || projCoords.y > 1.0) {
         return 0.0;
     }
 
     float dotNormalLight = dot(normal, lightDir);
 
-    // 2. CORREÇÃO DE VAZAMENTO NOTURNO
-    // Cancela a sombra nas "costas" APENAS se for um planeta opaco
     if(dotNormalLight < 0.0 && !ehTranslucido) {
         return 0.0;
     }
 
     float currentDepth = projCoords.z;
     
-    // O bias agora usa o valor absoluto, impedindo que fique gigantesco no anel
     float bias = max(0.005 * (1.0 - abs(dotNormalLight)), 0.001);
 
     float shadow = 0.0;

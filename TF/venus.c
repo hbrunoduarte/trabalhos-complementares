@@ -35,7 +35,7 @@ void renderizarVenus(CorpoCeleste *venus, const vector *camera, float currentFra
     float raioVisual = calcularRaioVisual(venus);
     vector posicaoVisual = calcularPosicaoVisual(venus);
 
-    // 1. DESENHAR A SUPERFÍCIE DE VÊNUS
+    // superfície
     glUseProgram(dados->shaderSuperficie);
 
     mat4 modelMatrix;
@@ -60,22 +60,20 @@ void renderizarVenus(CorpoCeleste *venus, const vector *camera, float currentFra
     glBindTexture(GL_TEXTURE_2D, dados->idSuperficie);
     glUniform1i(glGetUniformLocation(dados->shaderSuperficie, "texPlaneta"), 0);
 
-    glUniform1i(glGetUniformLocation(dados->shaderSuperficie, "isGasoso"), 1); // Saturno é gasoso
-    glUniform1i(glGetUniformLocation(dados->shaderSuperficie, "recebeSombras"), 1); // Recebe sombras dos anéis/luas
-    glUniform1f(glGetUniformLocation(dados->shaderSuperficie, "alphaMultiplicador"), 1.0f); // Impede que fique invisível
-    glUniform1f(glGetUniformLocation(dados->shaderSuperficie, "tempo"), currentFrame); // Mantém os gases girando
+    glUniform1i(glGetUniformLocation(dados->shaderSuperficie, "isGasoso"), 1);
+    glUniform1i(glGetUniformLocation(dados->shaderSuperficie, "recebeSombras"), 1);
+    glUniform1f(glGetUniformLocation(dados->shaderSuperficie, "alphaMultiplicador"), 1.0f);
+    glUniform1f(glGetUniformLocation(dados->shaderSuperficie, "tempo"), currentFrame);
 
     glActiveTexture(GL_TEXTURE4);
     glBindTexture(GL_TEXTURE_2D, venus->depthMap);
     glUniform1i(glGetUniformLocation(dados->shaderSuperficie, "shadowMap"), 4);
     glUniformMatrix4fv(glGetUniformLocation(dados->shaderSuperficie, "lightSpaceMatrix"), 1, GL_FALSE, (float*)venus->lightSpaceMatrix);
 
-
-    // Configurar o VBO para a superfície
     glBindVertexArray(venus->VAO);
     glDrawArrays(GL_TRIANGLES, 0, venus->totalVertices);
 
-    // 2. DESENHAR A ATMOSFERA
+    // atmosfera
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDepthMask(GL_FALSE); 
@@ -103,7 +101,6 @@ void renderizarVenus(CorpoCeleste *venus, const vector *camera, float currentFra
     glDrawArrays(GL_TRIANGLES, 0, venus->totalVertices);
     glBindVertexArray(0);
 
-    // Limpeza
     glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
     glBindVertexArray(0);
