@@ -61,7 +61,7 @@ void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
 
 void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 
-    float scrollSpeed = 0.5f;
+    float scrollSpeed = 0.05f;
 
     if (yoffset>0) {
         camera = addVectors(camera, mulVector(cameraFront, scrollSpeed));
@@ -98,10 +98,10 @@ void processarInput(GLFWwindow *window) {
     cameraFront.y = sin(pitchRad);
     cameraFront.z = sin(yawRad) * cos(pitchRad);
 
-    float velCaminhada = 0.2f;
+    float velCaminhada = 0.05f;
 
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-        velCaminhada = 1.0f;
+        velCaminhada = 0.5f;
     }
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
