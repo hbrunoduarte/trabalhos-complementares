@@ -42,7 +42,7 @@ void menuControle() {
 
 void criarMalhas(GLuint *VBOesfera, int *vEsfera, GLuint *VBOdisco, GLuint *VAOdisco, int *vDisco) {
 
-    EsferaMesh *meshEsfera = criarEsferaArray(1.0f, 128, 128);
+    EsferaMesh *meshEsfera = criarEsferaArray(1.0f, 64, 64);
     *vEsfera = meshEsfera->numVertices;
     long stride = SPHERE_INFO * sizeof(float);
 
@@ -112,7 +112,7 @@ void setSistemaSolar(CorpoCeleste *sistemaSolar) {
 
     sistemaSolar[SATURNO] = criarCorpoCeleste(5.6834e26, 687.0f, VETOR_NULO,
                                               1433.5e6, 4.4e-4f, 5.3e-2f,
-                                              renderizarPlaneta, getDadosPlaneta(TEX_SATURNO, 1, 1),
+                                              renderizarSaturno, getDadosSaturno(),
                                               &sistemaSolar[SOL]);
 
     sistemaSolar[URANO] = criarCorpoCeleste(8.6810e25, 1270.0f, VETOR_NULO,
@@ -133,6 +133,9 @@ void setSistemaSolar(CorpoCeleste *sistemaSolar) {
     sistemaSolar[ANEL_SATURNO] = criarCorpoCeleste(1.0f, 1.0f, VETOR_NULO, 0.0f, 0.0f, 26.0f * DEG2RAD,
                                                    renderizarAnelSaturno, getDadosAnelSaturno(),
                                                    &sistemaSolar[SATURNO]);
+
+    DadosAnelSaturno *dadosAnel = (DadosAnelSaturno*) sistemaSolar[ANEL_SATURNO].dadosVisuais;
+    setTexturaAnel(sistemaSolar[SATURNO].dadosVisuais, dadosAnel->idTextura);
 
     sistemaSolar[ASTEROIDE] = criarCorpoCeleste(3e24, 2900.0f, VETOR_NULO, 503.2e6,
                                                 1.3e-3f, 3e-3, renderizarAsteroide,
