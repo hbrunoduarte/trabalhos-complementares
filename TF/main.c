@@ -160,9 +160,13 @@ int main() {
     
     criarMalhas(&VBOesfera, &totalVerticesEsfera, &VBOdisco, &VAOdisco, &totalVerticesDisco);
 
+    glfwPollEvents();
+
     int numCorposCelestes = 12;
     CorpoCeleste *sistemaSolar = malloc(sizeof(CorpoCeleste) * numCorposCelestes);
-    setSistemaSolar(sistemaSolar);    
+    setSistemaSolar(sistemaSolar);
+    
+    glfwPollEvents();
 
     for (int i = 0; i < numCorposCelestes; i++) {
         sistemaSolar[i].VBO = VBOesfera;
@@ -196,12 +200,16 @@ int main() {
     }
     inicializarCinturao(&sistemaSolar[ASTEROIDE], 5.0f);
 
+    glfwPollEvents();
+
     carregarShaderSombras();
     setFramebufferSombras(sistemaSolar+1, numCorposCelestes-1);
     
     menuControle();
     
     DadosUniverso *universo = inicializarUniverso();
+
+    glfwPollEvents();
 
     while (!glfwWindowShouldClose(window) && running) {
 
