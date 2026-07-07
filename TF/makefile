@@ -9,7 +9,7 @@ SRCS = $(wildcard *.c)
 TARGET_SOLAR = main.out
 
 run: $(SRCS)
-	$(CC) $(CFLAGS) $(SRCS) $(LIBS) -o $(TARGET_SOLAR) && ./$(TARGET_SOLAR)
+	$(CC) $(CFLAGS) $(SRCS) $(LIBS) -o $(TARGET_SOLAR) -O3 && ./$(TARGET_SOLAR)
 
 # Limpeza dos arquivos binários
 clean:
